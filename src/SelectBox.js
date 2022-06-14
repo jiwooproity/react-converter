@@ -8,6 +8,7 @@ const SelectBoxElement = styled.select`
   border: none;
   margin-left: 5px;
   outline: 0 none;
+  font-size: 12px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 `;
 

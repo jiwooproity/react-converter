@@ -10,21 +10,38 @@ const ConverterContainer = styled.div`
   padding: 20px 20px 20px 20px;
 
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 
   background-color: rgba(0, 0, 0, 0.1);
 `;
 
+const ConvertMainWrapper = styled.div``;
+
 const ConverterWrapper = styled.div`
   padding: 20px;
-  border-radius: 10px;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 
   background-color: white;
   box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+`;
+
+const ConverterTitleWrap = styled.div`
+  padding: 20px;
+  border-top-right-radius: 10px;
+  border-top-left-radius: 10px;
+
+  background-color: rgba(0, 0, 0, 0.7);
+`;
+
+const ConverterTitle = styled.h1`
+  font-size: 15px;
+  color: white;
 `;
 
 const LanguageMenu = styled.div`
@@ -50,6 +67,7 @@ const TextInput = styled.input`
   padding: 5px 5px 5px 5px;
   margin-left: 5px;
   outline: 0 none;
+  font-size: 12px;
 
   border-color: rgba(0, 0, 0, 0.7);
   border: none;
@@ -94,7 +112,7 @@ const JsonView = styled.div`
 `;
 
 const languageData = [
-  { name: "Select Language", value: "" },
+  { name: "언어를 선택하세요.", value: "" },
   { name: "Korean", value: "Korean" },
   { name: "English", value: "English" },
   { name: "Chinese", value: "Chinese" },
@@ -207,28 +225,33 @@ const App = () => {
 
   return (
     <ConverterContainer>
-      <ConverterWrapper>
-        <LanguageMenu>
-          <LanguageTarget>API TOKEN : </LanguageTarget>
-          <TextInput value={API_TOKEN} readOnly />
-        </LanguageMenu>
-        <LanguageMenu>
-          <LanguageTarget>SpreadSheets ID : </LanguageTarget>
-          <TextInput value={spreadSheetsId} onChange={onChange} />
-        </LanguageMenu>
-        <LanguageMenu>
-          <LanguageTarget>Language Target : </LanguageTarget>
-          <SelectBox data={languageData} onSelect={onSelect} />
-        </LanguageMenu>
-        <JsonView>
-          <ReactJson src={jsonData} displayDataTypes={false} iconStyle={"circle"} />
-        </JsonView>
-        <DownloadWrap>
-          <DownloadButton disabled={jsonUrl === ""} href={jsonUrl} id={fileName} download={fileName}>
-            DOWNLOAD
-          </DownloadButton>
-        </DownloadWrap>
-      </ConverterWrapper>
+      <ConvertMainWrapper>
+        <ConverterTitleWrap>
+          <ConverterTitle>LG Converter</ConverterTitle>
+        </ConverterTitleWrap>
+        <ConverterWrapper>
+          <LanguageMenu>
+            <LanguageTarget>API TOKEN : </LanguageTarget>
+            <TextInput value={API_TOKEN} readOnly />
+          </LanguageMenu>
+          <LanguageMenu>
+            <LanguageTarget>SpreadSheets ID : </LanguageTarget>
+            <TextInput value={spreadSheetsId} onChange={onChange} />
+          </LanguageMenu>
+          <LanguageMenu>
+            <LanguageTarget>Language Target : </LanguageTarget>
+            <SelectBox data={languageData} onSelect={onSelect} />
+          </LanguageMenu>
+          <JsonView>
+            <ReactJson src={jsonData} displayDataTypes={false} iconStyle={"circle"} />
+          </JsonView>
+          <DownloadWrap>
+            <DownloadButton disabled={jsonUrl === ""} href={jsonUrl} id={fileName} download={fileName}>
+              DOWNLOAD
+            </DownloadButton>
+          </DownloadWrap>
+        </ConverterWrapper>
+      </ConvertMainWrapper>
     </ConverterContainer>
   );
 };
