@@ -17,24 +17,26 @@ const ConverterContainer = styled.div`
   background-color: rgba(0, 0, 0, 0.1);
 `;
 
-const ConvertMainWrapper = styled.div``;
+const ConvertMainWrapper = styled.div`
+  border-radius: 10px;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);
+
+  border: 1px solid rgba(0, 0, 0, 0.1);
+
+  overflow: hidden;
+`;
 
 const ConverterWrapper = styled.div`
   padding: 20px;
-  border-bottom-right-radius: 10px;
-  border-bottom-left-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 
   background-color: white;
-  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
 `;
 
 const ConverterTitleWrap = styled.div`
   padding: 20px;
-  border-top-right-radius: 10px;
-  border-top-left-radius: 10px;
 
   background-color: rgba(0, 0, 0, 0.7);
 `;
@@ -55,7 +57,7 @@ const LanguageMenu = styled.div`
 `;
 
 const LanguageTarget = styled.span`
-  font-size: 12px;
+  font-size: 11px;
   line-height: 12px;
 
   display: block;
@@ -64,16 +66,26 @@ const LanguageTarget = styled.span`
 
 const TextInput = styled.input`
   width: 380px;
-  padding: 5px 5px 5px 5px;
-  margin-left: 5px;
+  padding: 8px 5px 8px 5px;
+  margin-left: 10px;
   outline: 0 none;
   font-size: 12px;
 
   border-color: rgba(0, 0, 0, 0.7);
   border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 
   color: rgba(0, 0, 0, 0.8);
+
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.5);
+  }
+
+  &:focus {
+    border-color: rgba(0, 0, 0, 0.5);
+  }
+
+  transition: border-color 0.5s ease;
 `;
 
 const DownloadWrap = styled.div`
@@ -231,15 +243,15 @@ const App = () => {
         </ConverterTitleWrap>
         <ConverterWrapper>
           <LanguageMenu>
-            <LanguageTarget>API TOKEN : </LanguageTarget>
+            <LanguageTarget>API 토큰</LanguageTarget>
             <TextInput value={API_TOKEN} readOnly />
           </LanguageMenu>
           <LanguageMenu>
-            <LanguageTarget>SpreadSheets ID : </LanguageTarget>
+            <LanguageTarget>스프레드 시트 ID</LanguageTarget>
             <TextInput value={spreadSheetsId} onChange={onChange} />
           </LanguageMenu>
           <LanguageMenu>
-            <LanguageTarget>Language Target : </LanguageTarget>
+            <LanguageTarget>언어</LanguageTarget>
             <SelectBox data={languageData} onSelect={onSelect} />
           </LanguageMenu>
           <JsonView>
