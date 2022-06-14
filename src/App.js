@@ -5,6 +5,7 @@ import SelectBox from "./SelectBox";
 import ReactJson from "react-json-view";
 import Sky from "./image/sky.jpg";
 import Icon from "./image/spreadSheets.png";
+import JsonImage from "./image/json.png";
 
 const ConverterContainer = styled.div`
   width: 100%;
@@ -38,6 +39,15 @@ const ConverterBackground = styled.img`
 const ConverterSpreadSheetIcon = styled.img`
   width: 50px;
   height: 50px;
+
+  position: absolute;
+  top: 15px;
+  right: 60px;
+`;
+
+const JsonIcon = styled.img`
+  width: 49px;
+  height: 49px;
 
   position: absolute;
   top: 15px;
@@ -286,6 +296,9 @@ const App = () => {
     <ConverterContainer>
       <a href={`https://docs.google.com/spreadsheets/d/${spreadSheetsId}/edit#gid=0`} target={"_blank"} rel="noreferrer">
         <ConverterSpreadSheetIcon src={Icon} />
+      </a>
+      <a href={`https://sheets.googleapis.com/v4/spreadsheets/${spreadSheetsId}/values/Sheet1!A1:I9999?key=${API_TOKEN}`} target={"_blank"} rel="noreferrer">
+        <JsonIcon src={JsonImage} />
       </a>
 
       <ConverterBackground src={Sky} />
