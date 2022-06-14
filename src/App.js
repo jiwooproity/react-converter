@@ -3,11 +3,15 @@ import _ from "lodash";
 import styled from "styled-components";
 import SelectBox from "./SelectBox";
 import ReactJson from "react-json-view";
+import Sky from "./image/sky.jpg";
+import Icon from "./image/spreadSheets.png";
 
 const ConverterContainer = styled.div`
   width: 100%;
   height: 100vh;
   padding: 20px 20px 20px 20px;
+
+  position: relative;
 
   display: flex;
   flex-direction: column;
@@ -15,6 +19,29 @@ const ConverterContainer = styled.div`
   align-items: center;
 
   background-color: rgba(0, 0, 0, 0.1);
+`;
+
+const ConverterBackground = styled.img`
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  z-index: -1;
+`;
+
+const ConverterSpreadSheetIcon = styled.img`
+  width: 50px;
+  height: 50px;
+
+  position: absolute;
+  top: 15px;
+  right: 15px;
 `;
 
 const ConvertMainWrapper = styled.div`
@@ -97,8 +124,8 @@ const DownloadWrap = styled.div`
 
 const DownloadButton = styled.a`
   margin: 15px 0px 0px 0px;
-  padding: 10px;
-  font-size: 15px;
+  padding: 5px 10px 5px 10px;
+  font-size: 13px;
 
   text-decoration: none;
 
@@ -125,10 +152,14 @@ const JsonView = styled.div`
 
 const languageData = [
   { name: "언어를 선택하세요.", value: "" },
-  { name: "Korean", value: "Korean" },
-  { name: "English", value: "English" },
-  { name: "Chinese", value: "Chinese" },
-  { name: "Deutsch", value: "Deutsch" },
+  { name: "한국어", value: "Korean" },
+  { name: "영어", value: "English" },
+  { name: "중국어", value: "Chinese" },
+  { name: "독일어", value: "Deutsch" },
+  { name: "프랑스어", value: "Franch" },
+  { name: "일본어", value: "Japanese" },
+  { name: "포르투갈어", value: "Portuguese" },
+  { name: "스페인어", value: "Espanol" },
 ];
 
 const App = () => {
@@ -199,6 +230,22 @@ const App = () => {
         range = "E2:E9999";
         fileName = "de.json";
         break;
+      case "Franch":
+        range = "F2:F9999";
+        fileName = "fr.json";
+        break;
+      case "Japanese":
+        range = "G2:G9999";
+        fileName = "jp.json";
+        break;
+      case "Portuguese":
+        range = "H2:H9999";
+        fileName = "pt.json";
+        break;
+      case "Espanol":
+        range = "I2:I9999";
+        fileName = "es.json";
+        break;
       default:
         break;
     }
@@ -237,6 +284,11 @@ const App = () => {
 
   return (
     <ConverterContainer>
+      <a href={`https://docs.google.com/spreadsheets/d/${spreadSheetsId}/edit#gid=0`} target={"_blank"} rel="noreferrer">
+        <ConverterSpreadSheetIcon src={Icon} />
+      </a>
+
+      <ConverterBackground src={Sky} />
       <ConvertMainWrapper>
         <ConverterTitleWrap>
           <ConverterTitle>LG Converter</ConverterTitle>
@@ -259,7 +311,7 @@ const App = () => {
           </JsonView>
           <DownloadWrap>
             <DownloadButton disabled={jsonUrl === ""} href={jsonUrl} id={fileName} download={fileName}>
-              DOWNLOAD
+              다운로드
             </DownloadButton>
           </DownloadWrap>
         </ConverterWrapper>

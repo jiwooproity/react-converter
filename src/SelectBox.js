@@ -9,7 +9,7 @@ const SelectBoxElement = styled.select`
   margin-left: 10px;
   outline: 0 none;
   font-size: 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 
   &:hover {
     border-color: rgba(0, 0, 0, 0.5);
@@ -18,6 +18,8 @@ const SelectBoxElement = styled.select`
   &:focus {
     border-color: rgba(0, 0, 0, 0.5);
   }
+
+  transition: border-color 0.5s ease;
 `;
 
 const SelectBoxOption = styled.option``;
