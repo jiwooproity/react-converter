@@ -5,6 +5,7 @@ import SelectBox from "./SelectBox";
 import ReactJson from "react-json-view";
 import Sky from "./image/sky.jpg";
 import Icon from "./image/spreadSheets.png";
+import Refresh from "./image/refresh.jpg";
 import { kr, en, de, es, fr, ja, pt, zh } from "./defaultLocale";
 // import JsonImage from "./image/json.png";
 
@@ -82,12 +83,34 @@ const ConverterWrapper = styled.div`
 const ConverterTitleWrap = styled.div`
   padding: 20px;
 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
   background-color: rgba(0, 0, 0, 0.7);
 `;
 
 const ConverterTitle = styled.h1`
   font-size: 15px;
   color: white;
+`;
+
+const ConvertRefreshButton = styled.button`
+  background-color: transparent;
+  border: none;
+
+  cursor: pointer;
+
+  &:hover {
+    transform: rotate(360deg);
+  }
+
+  transition: transform 0.5s ease;
+`;
+
+const ConverterRefresh = styled.img`
+  width: 20px;
+  height: 20px;
 `;
 
 const LanguageMenu = styled.div`
@@ -142,21 +165,26 @@ const DownloadWrap = styled.div`
 const DownloadButton = styled.a`
   margin: 15px 0px 0px 0px;
   padding: 5px 10px 5px 10px;
-  font-size: 13px;
+  font-size: 12px;
 
   text-decoration: none;
 
   border-radius: 5px;
 
   background-color: ${({ disabled }) =>
-    disabled ? "rgba(0, 0, 0, 0.2)" : "rgba(0, 0, 0, 0.9)"};
+    disabled ? "rgba(0, 0, 0, 0.2)" : "rgba(0, 0, 0, 0.7)"};
   color: white;
 
   cursor: pointer;
 
   pointer-events: ${({ disabled }) => (disabled ? "none" : "")};
 
-  transition: background-color 0.5s ease;
+  &:hover {
+    background-color: rgba(0, 0, 0, 1);
+    color: yellow;
+  }
+
+  transition: background-color 0.5s ease, color 0.5s ease;
 `;
 
 const JsonView = styled.div`
@@ -166,6 +194,36 @@ const JsonView = styled.div`
   overflow-y: scroll;
 
   display: block;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+  }
+`;
+
+const LoadingWrap = styled.div`
+  width: 100%;
+  height: 300px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const LoadingText = styled.span`
+  font-size: 12px;
+
+  color: rgba(0, 0, 0, 0.8);
 `;
 
 const languageData = [
@@ -190,6 +248,8 @@ const App = () => {
   const [jsonUrl, setJsonUrl] = useState(""); // JSON 다운로드 주소 생성
   const [fileName, setFileName] = useState(""); // file 생성 시, JSON 파일 이름 설정
   const [jsonData, setJsonData] = useState(); // ReactJson View에 표시 할 Json
+  const [loading, setLoading] = useState(true);
+  const [selectLanguage, setSelectLanguage] = useState("");
 
   // SpreacAPI Cell Data
   const SpreadAPI = async (range) => {
@@ -229,6 +289,12 @@ const App = () => {
         const splitChar = stringId[index][0].split(" ");
 
         if (stringId[index][0].split(" ").length > 1 && splitChar[1] !== "") {
+          console.log(
+            `String Key : 값 사이에 공백이 존재함 [${index + 2}번 행] "${
+              stringId[index]
+            }"`
+          );
+
           // 구분 된 ID일 경우 소문자로 변환
           stringId[index][0] = stringId[index][0].toLowerCase();
           // 소문자로 변환 후, " " 공백 부분 "_"로 변환 ex) Progress Record > progress_record
@@ -252,12 +318,15 @@ const App = () => {
 
     setJsonUrl(JsonUrl);
     setJsonData(language);
+    setLoading(true);
   };
 
   const getLanguage = async (language) => {
     let range = "";
     let fileName = "";
     let defaultLocale = {};
+
+    setLoading(false);
 
     switch (language) {
       case "Korean":
@@ -322,11 +391,13 @@ const App = () => {
     const { value } = e.target;
 
     if (value === "") {
+      setSelectLanguage(value);
       setJsonData();
       setJsonUrl(value);
       return;
     }
 
+    setSelectLanguage(value);
     getLanguage(value);
   };
 
@@ -334,6 +405,16 @@ const App = () => {
     const { value } = e.target;
 
     setSpreadSheetsId(value);
+  };
+
+  const onRefresh = () => {
+    if (selectLanguage === "") {
+      setJsonData();
+      setJsonUrl(selectLanguage);
+      return;
+    }
+
+    getLanguage(selectLanguage);
   };
 
   return (
@@ -357,6 +438,9 @@ const App = () => {
       <ConvertMainWrapper>
         <ConverterTitleWrap>
           <ConverterTitle>LG Converter</ConverterTitle>
+          <ConvertRefreshButton onClick={onRefresh}>
+            <ConverterRefresh src={Refresh} />
+          </ConvertRefreshButton>
         </ConverterTitleWrap>
         <ConverterWrapper>
           <LanguageMenu>
@@ -372,12 +456,19 @@ const App = () => {
             <SelectBox data={languageData} onSelect={onSelect} />
           </LanguageMenu>
           <JsonView>
-            <ReactJson
-              src={jsonData}
-              displayDataTypes={false}
-              iconStyle={"circle"}
-            />
+            {loading ? (
+              <ReactJson
+                src={jsonData}
+                displayDataTypes={false}
+                iconStyle={"circle"}
+              />
+            ) : (
+              <LoadingWrap>
+                <LoadingText>JSON 파일 생성 중</LoadingText>
+              </LoadingWrap>
+            )}
           </JsonView>
+
           <DownloadWrap>
             <DownloadButton
               disabled={jsonUrl === ""}
@@ -385,7 +476,7 @@ const App = () => {
               id={fileName}
               download={fileName}
             >
-              다운로드
+              JSON 다운로드
             </DownloadButton>
           </DownloadWrap>
         </ConverterWrapper>
