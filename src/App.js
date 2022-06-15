@@ -290,6 +290,14 @@ const App = () => {
 
   // SpreadSheet에서 사용자가 선택한 언어의 JSON 저장
   const googleSpreadSheetsConnect = async (defaultLocale, range) => {
+    //
+    const sendMessage = (idx, stringID, where) => {
+      let char01 = `[경고] String Key : 값 ${where}에 공백이 존재함 `;
+      char01 += `[${idx + 2}번 행] "${stringID}"`;
+
+      console.log(char01);
+    };
+
     // JSON 임시 저장
     let language = { default: { ...defaultLocale } };
 
@@ -310,11 +318,7 @@ const App = () => {
         const splitChar = stringId[index][0].split(" ");
 
         if (stringId[index][0].split(" ").length > 1 && splitChar[1] !== "") {
-          console.log(
-            `String Key : 값 사이에 공백이 존재함 [${index + 2}번 행] "${
-              stringId[index]
-            }"`
-          );
+          sendMessage(index, stringId[index][0], "사이");
 
           // 구분 된 ID일 경우 소문자로 변환
           stringId[index][0] = stringId[index][0].toLowerCase();
@@ -323,11 +327,7 @@ const App = () => {
         }
 
         if (splitChar[1] === "") {
-          console.log(
-            `String Key : 값 뒤에 공백이 존재함 [${index + 2}번 행] "${
-              stringId[index]
-            }"`
-          );
+          sendMessage(index, stringId[index][0], "뒤");
         }
       }
 
