@@ -218,7 +218,20 @@ const App = () => {
     }
 
     _.forEach(getData, (res, index) => {
-      language = { ...language, [stringId[index][0]]: res[0] ? res[0] : "" };
+      // 설정 된 Object Key ( StringID ) 가 존재할 경우
+
+      if (stringId[index][0]) {
+        const splitChar = stringId[index][0].split(" ");
+
+        if (stringId[index][0].split(" ").length > 1 && splitChar[1] !== "") {
+          // 구분 된 ID일 경우 소문자로 변환
+          stringId[index][0] = stringId[index][0].toLowerCase();
+          // 소문자로 변환 후, " " 공백 부분 "_"로 변환 ex) Progress Record > progress_record
+          stringId[index][0] = stringId[index][0].replaceAll(" ", "_");
+        }
+
+        language = { ...language, [stringId[index][0]]: res[0] ? res[0] : "" };
+      }
     });
 
     const charset = "data:application/json;charset=utf-8,";
