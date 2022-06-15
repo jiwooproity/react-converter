@@ -201,14 +201,18 @@ const App = () => {
     return resJson.values ? resJson.values : resJson;
   };
 
+  // 설정된 Object Key 값 저장
   const getGoogleSpreadSheetsStringId = async () => {
     const getData = await SpreadAPI("A2:A9999");
     setStringId(getData);
   };
 
+  // SpreadSheet에서 사용자가 선택한 언어의 JSON 저장
   const googleSpreadSheetsConnect = async (range) => {
+    // JSON 임시 저장
     let language = {};
 
+    // JSON API
     const getData = await SpreadAPI(range);
 
     // 오류 발견 시
@@ -218,7 +222,7 @@ const App = () => {
     }
 
     _.forEach(getData, (res, index) => {
-      // 설정 된 Object Key ( StringID ) 가 존재할 경우
+      // 설정된 Object Key ( StringID ) 가 존재할 경우
 
       if (stringId[index][0]) {
         const splitChar = stringId[index][0].split(" ");
@@ -238,6 +242,7 @@ const App = () => {
 
     let JsonUrl =
       charset + encodeURIComponent(JSON.stringify(language, null, 2));
+
     setJsonUrl(JsonUrl);
     setJsonData(language);
   };
