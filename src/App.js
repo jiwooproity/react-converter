@@ -181,8 +181,8 @@ const DownloadButton = styled.a`
   pointer-events: ${({ disabled }) => (disabled ? "none" : "")};
 
   &:hover {
-    background-color: rgba(0, 0, 0, 1);
-    color: yellow;
+    background-color: #a50034;
+    color: white;
   }
 
   transition: background-color 0.5s ease, color 0.5s ease, height 0.5s ease;
