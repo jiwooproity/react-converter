@@ -42,7 +42,13 @@ const ConverterSpreadSheetIcon = styled.img`
 
   position: absolute;
   top: 15px;
-  right: 60px;
+  right: 15px;
+
+  &:hover {
+    top: 12px;
+  }
+
+  transition: top 0.5s ease;
 `;
 
 // const JsonIcon = styled.img`
