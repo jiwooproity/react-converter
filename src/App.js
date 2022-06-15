@@ -235,7 +235,12 @@ const App = () => {
           stringId[index][0] = stringId[index][0].replaceAll(" ", "_");
         }
 
-        language = { ...language, [stringId[index][0]]: res[0] ? res[0] : "" };
+        language = {
+          new_locale: {
+            ...language.new_locale,
+            [stringId[index][0]]: res[0] ? res[0] : "",
+          },
+        };
       }
     });
 
