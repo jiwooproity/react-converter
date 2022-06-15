@@ -5,6 +5,7 @@ import SelectBox from "./SelectBox";
 import ReactJson from "react-json-view";
 import Sky from "./image/sky.jpg";
 import Icon from "./image/spreadSheets.png";
+import { kr, en, de, es, fr, ja, pt, zh } from "./defaultLocale";
 // import JsonImage from "./image/json.png";
 
 const ConverterContainer = styled.div`
@@ -208,9 +209,9 @@ const App = () => {
   };
 
   // SpreadSheet에서 사용자가 선택한 언어의 JSON 저장
-  const googleSpreadSheetsConnect = async (range) => {
+  const googleSpreadSheetsConnect = async (defaultLocale, range) => {
     // JSON 임시 저장
-    let language = {};
+    let language = { default: { ...defaultLocale } };
 
     // JSON API
     const getData = await SpreadAPI(range);
@@ -240,8 +241,8 @@ const App = () => {
 
     const charset = "data:application/json;charset=utf-8,";
 
-    let JsonUrl =
-      charset + encodeURIComponent(JSON.stringify(language, null, 2));
+    let JsonUrl = charset;
+    JsonUrl += encodeURIComponent(JSON.stringify(language, null, 2));
 
     setJsonUrl(JsonUrl);
     setJsonData(language);
@@ -250,45 +251,54 @@ const App = () => {
   const getLanguage = async (language) => {
     let range = "";
     let fileName = "";
+    let defaultLocale = {};
 
     switch (language) {
       case "Korean":
         range = "B2:B9999";
         fileName = "ko.json";
+        defaultLocale = kr;
         break;
       case "English":
         range = "C2:C9999";
         fileName = "en.json";
+        defaultLocale = en;
         break;
       case "Chinese":
         range = "D2:D9999";
         fileName = "zh.json";
+        defaultLocale = zh;
         break;
       case "Deutsch":
         range = "E2:E9999";
         fileName = "de.json";
+        defaultLocale = de;
         break;
       case "Franch":
         range = "F2:F9999";
         fileName = "fr.json";
+        defaultLocale = fr;
         break;
       case "Japanese":
         range = "G2:G9999";
-        fileName = "jp.json";
+        fileName = "ja.json";
+        defaultLocale = ja;
         break;
       case "Portuguese":
         range = "H2:H9999";
         fileName = "pt.json";
+        defaultLocale = pt;
         break;
       case "Espanol":
         range = "I2:I9999";
         fileName = "es.json";
+        defaultLocale = es;
         break;
       default:
         break;
     }
 
-    googleSpreadSheetsConnect(range);
+    googleSpreadSheetsConnect(defaultLocale, range);
     setFileName(fileName);
   };
 
