@@ -90,6 +90,12 @@ const ConverterTitleWrap = styled.div`
   background-color: rgba(0, 0, 0, 0.7);
 `;
 
+const ConverterBottomWrap = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
 const ConverterTitle = styled.h1`
   font-size: 15px;
   color: white;
@@ -155,27 +161,22 @@ const TextInput = styled.input`
   transition: border-color 0.5s ease;
 `;
 
-const DownloadWrap = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
 const DownloadButton = styled.a`
-  margin: 15px 0px 0px 0px;
-  padding: 5px 10px 5px 10px;
+  width: 100%;
+  height: ${({ disabled }) => (disabled ? "0px" : "40px")};
+
+  line-height: 40px;
+
+  text-align: center;
   font-size: 12px;
 
   text-decoration: none;
 
-  border-radius: 5px;
-
-  background-color: ${({ disabled }) =>
-    disabled ? "rgba(0, 0, 0, 0.2)" : "rgba(0, 0, 0, 0.7)"};
   color: white;
 
   cursor: pointer;
+
+  background-color: rgba(0, 0, 0, 0.7);
 
   pointer-events: ${({ disabled }) => (disabled ? "none" : "")};
 
@@ -184,7 +185,7 @@ const DownloadButton = styled.a`
     color: yellow;
   }
 
-  transition: background-color 0.5s ease, color 0.5s ease;
+  transition: background-color 0.5s ease, color 0.5s ease, height 0.5s ease;
 `;
 
 const JsonView = styled.div`
@@ -474,18 +475,17 @@ const App = () => {
               </LoadingWrap>
             )}
           </JsonView>
-
-          <DownloadWrap>
-            <DownloadButton
-              disabled={jsonUrl === ""}
-              href={jsonUrl}
-              id={fileName}
-              download={fileName}
-            >
-              JSON 다운로드
-            </DownloadButton>
-          </DownloadWrap>
         </ConverterWrapper>
+        <ConverterBottomWrap>
+          <DownloadButton
+            disabled={jsonUrl === ""}
+            href={jsonUrl}
+            id={fileName}
+            download={fileName}
+          >
+            JSON 다운로드
+          </DownloadButton>
+        </ConverterBottomWrap>
       </ConvertMainWrapper>
     </ConverterContainer>
   );
