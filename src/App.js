@@ -193,6 +193,11 @@ const JsonView = styled.div`
   max-height: 300px;
   overflow-y: scroll;
 
+  padding: 10px;
+
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+
   display: block;
 
   &::-webkit-scrollbar {
@@ -300,15 +305,15 @@ const App = () => {
           // 소문자로 변환 후, " " 공백 부분 "_"로 변환 ex) Progress Record > progress_record
           stringId[index][0] = stringId[index][0].replaceAll(" ", "_");
         }
-
-        language = {
-          ...language,
-          new_locale: {
-            ...language.new_locale,
-            [stringId[index][0]]: res[0] ? res[0] : "",
-          },
-        };
       }
+
+      language = {
+        ...language,
+        new_locale: {
+          ...language.new_locale,
+          [stringId[index][0]]: res[0] ? res[0] : "",
+        },
+      };
     });
 
     const charset = "data:application/json;charset=utf-8,";
@@ -414,6 +419,7 @@ const App = () => {
       return;
     }
 
+    getGoogleSpreadSheetsStringId();
     getLanguage(selectLanguage);
   };
 
