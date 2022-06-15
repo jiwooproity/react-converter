@@ -5,7 +5,7 @@ import SelectBox from "./SelectBox";
 import ReactJson from "react-json-view";
 import Sky from "./image/sky.jpg";
 import Icon from "./image/spreadSheets.png";
-import JsonImage from "./image/json.png";
+// import JsonImage from "./image/json.png";
 
 const ConverterContainer = styled.div`
   width: 100%;
@@ -45,14 +45,14 @@ const ConverterSpreadSheetIcon = styled.img`
   right: 60px;
 `;
 
-const JsonIcon = styled.img`
-  width: 49px;
-  height: 49px;
+// const JsonIcon = styled.img`
+//   width: 49px;
+//   height: 49px;
 
-  position: absolute;
-  top: 15px;
-  right: 15px;
-`;
+//   position: absolute;
+//   top: 15px;
+//   right: 15px;
+// `;
 
 const ConvertMainWrapper = styled.div`
   border-radius: 10px;
@@ -141,7 +141,8 @@ const DownloadButton = styled.a`
 
   border-radius: 5px;
 
-  background-color: ${({ disabled }) => (disabled ? "rgba(0, 0, 0, 0.2)" : "rgba(0, 0, 0, 0.9)")};
+  background-color: ${({ disabled }) =>
+    disabled ? "rgba(0, 0, 0, 0.2)" : "rgba(0, 0, 0, 0.9)"};
   color: white;
 
   cursor: pointer;
@@ -174,7 +175,9 @@ const languageData = [
 
 const App = () => {
   const API_TOKEN = "AIzaSyBiXVHWac0qqPbeW857yGxkeMr5OZ401kM";
-  const [spreadSheetsId, setSpreadSheetsId] = useState("1k5Muc1xM3_PP0musMihHJMEkYYarIVSKKERUriHBkV8");
+  const [spreadSheetsId, setSpreadSheetsId] = useState(
+    "1k5Muc1xM3_PP0musMihHJMEkYYarIVSKKERUriHBkV8"
+  );
 
   const [stringId, setStringId] = useState([]); // STR_ID 등록
   const [jsonUrl, setJsonUrl] = useState(""); // JSON 다운로드 주소 생성
@@ -185,9 +188,9 @@ const App = () => {
   const SpreadAPI = async (range) => {
     let resJson = [];
 
-    resJson = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadSheetsId}/values/Sheet1!${range}?key=${API_TOKEN}`).then((response) =>
-      response.json()
-    );
+    resJson = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadSheetsId}/values/Sheet1!${range}?key=${API_TOKEN}`
+    ).then((response) => response.json());
 
     return resJson.values ? resJson.values : resJson;
   };
@@ -209,12 +212,13 @@ const App = () => {
     }
 
     _.forEach(getData, (res, index) => {
-      language = { ...language, [stringId[index][0]]: res[0] };
+      language = { ...language, [stringId[index][0]]: res[0] ? res[0] : "" };
     });
 
     const charset = "data:application/json;charset=utf-8,";
 
-    let JsonUrl = charset + encodeURIComponent(JSON.stringify(language, null, 2));
+    let JsonUrl =
+      charset + encodeURIComponent(JSON.stringify(language, null, 2));
     setJsonUrl(JsonUrl);
     setJsonData(language);
   };
@@ -294,12 +298,20 @@ const App = () => {
 
   return (
     <ConverterContainer>
-      <a href={`https://docs.google.com/spreadsheets/d/${spreadSheetsId}/edit#gid=0`} target={"_blank"} rel="noreferrer">
+      <a
+        href={`https://docs.google.com/spreadsheets/d/${spreadSheetsId}/edit#gid=0`}
+        target={"_blank"}
+        rel="noreferrer"
+      >
         <ConverterSpreadSheetIcon src={Icon} />
       </a>
-      <a href={`https://sheets.googleapis.com/v4/spreadsheets/${spreadSheetsId}/values/Sheet1!A1:I9999?key=${API_TOKEN}`} target={"_blank"} rel="noreferrer">
+      {/* <a
+        href={`https://sheets.googleapis.com/v4/spreadsheets/${spreadSheetsId}/values/Sheet1!A1:I9999?key=${API_TOKEN}`}
+        target={"_blank"}
+        rel="noreferrer"
+      >
         <JsonIcon src={JsonImage} />
-      </a>
+      </a> */}
 
       <ConverterBackground src={Sky} />
       <ConvertMainWrapper>
@@ -320,10 +332,19 @@ const App = () => {
             <SelectBox data={languageData} onSelect={onSelect} />
           </LanguageMenu>
           <JsonView>
-            <ReactJson src={jsonData} displayDataTypes={false} iconStyle={"circle"} />
+            <ReactJson
+              src={jsonData}
+              displayDataTypes={false}
+              iconStyle={"circle"}
+            />
           </JsonView>
           <DownloadWrap>
-            <DownloadButton disabled={jsonUrl === ""} href={jsonUrl} id={fileName} download={fileName}>
+            <DownloadButton
+              disabled={jsonUrl === ""}
+              href={jsonUrl}
+              id={fileName}
+              download={fileName}
+            >
               다운로드
             </DownloadButton>
           </DownloadWrap>
