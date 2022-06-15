@@ -321,6 +321,14 @@ const App = () => {
           // 소문자로 변환 후, " " 공백 부분 "_"로 변환 ex) Progress Record > progress_record
           stringId[index][0] = stringId[index][0].replaceAll(" ", "_");
         }
+
+        if (splitChar[1] === "") {
+          console.log(
+            `String Key : 값 뒤에 공백이 존재함 [${index + 2}번 행] "${
+              stringId[index]
+            }"`
+          );
+        }
       }
 
       language = {
@@ -335,7 +343,9 @@ const App = () => {
     const charset = "data:application/json;charset=utf-8,";
 
     let JsonUrl = charset;
-    JsonUrl += encodeURIComponent(JSON.stringify(language, null, 2));
+    JsonUrl += encodeURIComponent(
+      "const root = " + JSON.stringify(language, null, 2)
+    );
 
     setJsonUrl(JsonUrl);
     setJsonData(language);
@@ -352,42 +362,42 @@ const App = () => {
     switch (language) {
       case "Korean":
         range = "B2:B9999";
-        fileName = "ko.json";
+        fileName = "ko.js";
         defaultLocale = kr;
         break;
       case "English":
         range = "C2:C9999";
-        fileName = "en.json";
+        fileName = "en.js";
         defaultLocale = en;
         break;
       case "Chinese":
         range = "D2:D9999";
-        fileName = "zh.json";
+        fileName = "zh.js";
         defaultLocale = zh;
         break;
       case "Deutsch":
         range = "E2:E9999";
-        fileName = "de.json";
+        fileName = "de.js";
         defaultLocale = de;
         break;
       case "Franch":
         range = "F2:F9999";
-        fileName = "fr.json";
+        fileName = "fr.js";
         defaultLocale = fr;
         break;
       case "Japanese":
         range = "G2:G9999";
-        fileName = "ja.json";
+        fileName = "ja.js";
         defaultLocale = ja;
         break;
       case "Portuguese":
         range = "H2:H9999";
-        fileName = "pt.json";
+        fileName = "pt.js";
         defaultLocale = pt;
         break;
       case "Espanol":
         range = "I2:I9999";
-        fileName = "es.json";
+        fileName = "es.js";
         defaultLocale = es;
         break;
       default:
