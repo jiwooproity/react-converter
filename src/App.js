@@ -236,6 +236,7 @@ const App = () => {
         }
 
         language = {
+          ...language,
           new_locale: {
             ...language.new_locale,
             [stringId[index][0]]: res[0] ? res[0] : "",
