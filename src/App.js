@@ -6,6 +6,7 @@ import ReactJson from "react-json-view";
 import Sky from "./image/sky.jpg";
 import Icon from "./image/spreadSheets.png";
 import Refresh from "./image/refresh.jpg";
+import axios from "axios";
 import { kr, en, de, es, fr, ja, pt, zh } from "./defaultLocale";
 // import JsonImage from "./image/json.png";
 
@@ -129,6 +130,13 @@ const LanguageMenu = styled.div`
   padding: 4px 0px;
 `;
 
+const LanguageRequired = styled.span`
+  font-size: 14px;
+  margin-right: 2px;
+
+  color: rgb(165, 0, 52);
+`;
+
 const LanguageTarget = styled.span`
   font-size: 11px;
   line-height: 12px;
@@ -199,8 +207,6 @@ const JsonView = styled.div`
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 5px;
 
-  display: block;
-
   &::-webkit-scrollbar {
     width: 5px;
     height: 5px;
@@ -261,11 +267,19 @@ const App = () => {
   const SpreadAPI = async (range) => {
     let resJson = [];
 
-    resJson = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${spreadSheetsId}/values/Sheet1!${range}?key=${API_TOKEN}`
-    ).then((response) => response.json());
+    try {
+      resJson = await axios.get(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadSheetsId}/values/Sheet1!${range}?key=${API_TOKEN}`
+      );
+    } catch (e) {
+      return e;
+    }
 
-    return resJson.values ? resJson.values : resJson;
+    const {
+      data: { values: JSON },
+    } = resJson;
+
+    return JSON ? JSON : resJson;
   };
 
   // 설정된 Object Key 값 저장
@@ -283,8 +297,9 @@ const App = () => {
     const getData = await SpreadAPI(range);
 
     // 오류 발견 시
-    if (getData.error) {
-      setJsonData(getData.error);
+    if (getData.code) {
+      setJsonData(getData);
+      setLoading(true);
       return;
     }
 
@@ -459,8 +474,13 @@ const App = () => {
             <TextInput value={spreadSheetsId} onChange={onChange} />
           </LanguageMenu>
           <LanguageMenu>
+            <LanguageRequired>*</LanguageRequired>
             <LanguageTarget>언어</LanguageTarget>
-            <SelectBox data={languageData} onSelect={onSelect} />
+            <SelectBox
+              required={jsonUrl === ""}
+              data={languageData}
+              onSelect={onSelect}
+            />
           </LanguageMenu>
           <JsonView>
             {loading ? (
