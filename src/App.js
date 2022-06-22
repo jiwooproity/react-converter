@@ -343,9 +343,7 @@ const App = () => {
     const charset = "data:application/json;charset=utf-8,";
 
     let JsonUrl = charset;
-    JsonUrl += encodeURIComponent(
-      "const root = " + JSON.stringify(language, null, 2)
-    );
+    JsonUrl += encodeURIComponent(JSON.stringify(language, null, 2));
 
     setJsonUrl(JsonUrl);
     setJsonData(language);
@@ -362,42 +360,42 @@ const App = () => {
     switch (language) {
       case "Korean":
         range = "B2:B9999";
-        fileName = "ko.js";
+        fileName = "ko.json";
         defaultLocale = kr;
         break;
       case "English":
         range = "C2:C9999";
-        fileName = "en.js";
+        fileName = "en.json";
         defaultLocale = en;
         break;
       case "Chinese":
         range = "D2:D9999";
-        fileName = "zh.js";
+        fileName = "zh.json";
         defaultLocale = zh;
         break;
       case "Deutsch":
         range = "E2:E9999";
-        fileName = "de.js";
+        fileName = "de.json";
         defaultLocale = de;
         break;
       case "Franch":
         range = "F2:F9999";
-        fileName = "fr.js";
+        fileName = "fr.json";
         defaultLocale = fr;
         break;
       case "Japanese":
         range = "G2:G9999";
-        fileName = "ja.js";
+        fileName = "ja.json";
         defaultLocale = ja;
         break;
       case "Portuguese":
         range = "H2:H9999";
-        fileName = "pt.js";
+        fileName = "pt.json";
         defaultLocale = pt;
         break;
       case "Espanol":
         range = "I2:I9999";
-        fileName = "es.js";
+        fileName = "es.json";
         defaultLocale = es;
         break;
       default:
@@ -458,13 +456,6 @@ const App = () => {
       >
         <ConverterSpreadSheetIcon src={Icon} />
       </a>
-      {/* <a
-        href={`https://sheets.googleapis.com/v4/spreadsheets/${spreadSheetsId}/values/Sheet1!A1:I9999?key=${API_TOKEN}`}
-        target={"_blank"}
-        rel="noreferrer"
-      >
-        <JsonIcon src={JsonImage} />
-      </a> */}
 
       <ConverterBackground src={Sky} />
       <ConvertMainWrapper>
