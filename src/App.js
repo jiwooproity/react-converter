@@ -258,11 +258,6 @@ const App = () => {
     "1k5Muc1xM3_PP0musMihHJMEkYYarIVSKKERUriHBkV8"
   );
 
-  useEffect(() => {
-    let File = new XMLHttpRequest();
-    File.open("GET", "../API_Token.txt", true);
-  }, []);
-
   const [stringId, setStringId] = useState([]); // STR_ID 등록
   const [jsonUrl, setJsonUrl] = useState(""); // JSON 다운로드 주소 생성
   const [fileName, setFileName] = useState(""); // file 생성 시, JSON 파일 이름 설정
