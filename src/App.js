@@ -251,10 +251,17 @@ const languageData = [
 ];
 
 const App = () => {
-  const API_TOKEN = "AIzaSyBiXVHWac0qqPbeW857yGxkeMr5OZ401kM";
+  const [API_TOKEN, setAPI_TOKEN] = useState(
+    "AIzaSyBiXVHWac0qqPbeW857yGxkeMr5OZ401kM"
+  );
   const [spreadSheetsId, setSpreadSheetsId] = useState(
     "1k5Muc1xM3_PP0musMihHJMEkYYarIVSKKERUriHBkV8"
   );
+
+  useEffect(() => {
+    let File = new XMLHttpRequest();
+    File.open("GET", "../API_Token.txt", true);
+  }, []);
 
   const [stringId, setStringId] = useState([]); // STR_ID 등록
   const [jsonUrl, setJsonUrl] = useState(""); // JSON 다운로드 주소 생성
@@ -288,16 +295,15 @@ const App = () => {
     setStringId(getData);
   };
 
+  const sendMessage = (idx, stringID, where) => {
+    let char01 = `[경고] String Key : 값 ${where}에 공백이 존재함 `;
+    char01 += `[${idx + 2}번 행] "${stringID}"`;
+
+    console.log(char01);
+  };
+
   // SpreadSheet에서 사용자가 선택한 언어의 JSON 저장
   const googleSpreadSheetsConnect = async (defaultLocale, range) => {
-    //
-    const sendMessage = (idx, stringID, where) => {
-      let char01 = `[경고] String Key : 값 ${where}에 공백이 존재함 `;
-      char01 += `[${idx + 2}번 행] "${stringID}"`;
-
-      console.log(char01);
-    };
-
     // JSON 임시 저장
     let language = { default: { ...defaultLocale } };
 
@@ -431,9 +437,18 @@ const App = () => {
   };
 
   const onChange = (e) => {
-    const { value } = e.target;
+    const { name, value } = e.target;
 
-    setSpreadSheetsId(value);
+    switch (name) {
+      case "token":
+        setAPI_TOKEN(value);
+        break;
+      case "spread":
+        setSpreadSheetsId(value);
+        break;
+      default:
+        break;
+    }
   };
 
   const onRefresh = () => {
@@ -468,11 +483,15 @@ const App = () => {
         <ConverterWrapper>
           <LanguageMenu>
             <LanguageTarget>API 토큰</LanguageTarget>
-            <TextInput value={API_TOKEN} readOnly />
+            <TextInput name="token" value={API_TOKEN} onChange={onChange} />
           </LanguageMenu>
           <LanguageMenu>
             <LanguageTarget>스프레드 시트 ID</LanguageTarget>
-            <TextInput value={spreadSheetsId} onChange={onChange} />
+            <TextInput
+              name="spread"
+              value={spreadSheetsId}
+              onChange={onChange}
+            />
           </LanguageMenu>
           <LanguageMenu>
             <LanguageRequired>*</LanguageRequired>
