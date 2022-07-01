@@ -321,14 +321,24 @@ const App = () => {
         if (stringId[index][0].split(" ").length > 1 && splitChar[1] !== "") {
           sendMessage(index, stringId[index][0], "사이");
 
-          // 구분 된 ID일 경우 소문자로 변환
-          stringId[index][0] = stringId[index][0].toLowerCase();
-          // 소문자로 변환 후, " " 공백 부분 "_"로 변환 ex) Progress Record > progress_record
-          stringId[index][0] = stringId[index][0].replaceAll(" ", "_");
+          // // 구분 된 ID일 경우 소문자로 변환
+          // stringId[index][0] = stringId[index][0].toLowerCase();
+
+          // " " 공백 부분 제거 후, 배열로 변환 ex) Process Record > ["Process", "Record"];
+          stringId[index][0] = stringId[index][0].split(" ");
+
+          // 문자열 마지막에 공백이 존재하면 공백 제거
+          if (stringId[index][0][stringId[index][0].length - 1] === "") {
+            stringId[index][0] = stringId[index][0].slice(0, -1);
+          }
+
+          // 마지막으로 각 배열 사이에 "_" 추가함 ex) ["Process", "Record"] > Process_Record
+          stringId[index][0] = stringId[index][0].join("_");
         }
 
         if (splitChar[1] === "") {
           sendMessage(index, stringId[index][0], "뒤");
+          stringId[index][0] = stringId[index][0].replaceAll(" ", "");
         }
       }
 
