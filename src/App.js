@@ -290,8 +290,8 @@ const App = () => {
     setStringId(getData);
   };
 
-  const sendMessage = (idx, stringID, where) => {
-    let char01 = `[경고] String Key : 값 ${where}에 공백이 존재함 `;
+  const sendMessage = (idx, type, stringID, where) => {
+    let char01 = `[확인] ${type} : 값 ${where}에 공백이 존재함 `;
     char01 += `[${idx + 2}번 행] "${stringID}"`;
 
     console.log(char01);
@@ -314,12 +314,14 @@ const App = () => {
 
     _.forEach(getData, (res, index) => {
       // 설정된 Object Key ( StringID ) 가 존재할 경우
+      let type = "";
 
       if (stringId[index][0]) {
+        type = "key";
         const splitChar = stringId[index][0].split(" ");
 
-        if (stringId[index][0].split(" ").length > 1 && splitChar[1] !== "") {
-          sendMessage(index, stringId[index][0], "사이");
+        if (splitChar.length > 1 && splitChar[1] !== "") {
+          sendMessage(index, type, stringId[index][0], "사이");
 
           // // 구분 된 ID일 경우 소문자로 변환
           // stringId[index][0] = stringId[index][0].toLowerCase();
@@ -337,8 +339,18 @@ const App = () => {
         }
 
         if (splitChar[1] === "") {
-          sendMessage(index, stringId[index][0], "뒤");
+          sendMessage(index, type, stringId[index][0], "뒤");
           stringId[index][0] = stringId[index][0].replaceAll(" ", "");
+        }
+      }
+
+      if (res[0]) {
+        type = "string";
+        let resSplit = res[0].split(" ");
+
+        if (resSplit[resSplit.length - 1] === "") {
+          sendMessage(index, type, res[0], "뒤");
+          res[0] = resSplit.slice(0, -1)[0];
         }
       }
 
