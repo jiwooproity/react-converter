@@ -3,9 +3,8 @@ import _ from "lodash";
 import styled from "styled-components";
 import SelectBox from "./SelectBox";
 import ReactJson from "react-json-view";
-import Sky from "./image/sky.jpg";
 import * as XLSX from "xlsx";
-// import { kr, en, de, es, fr, ja, pt, zh } from "./defaultLocale";
+import { kr, en, de, es, fr, ja, pt, zh } from "./defaultLocale";
 
 const ConverterContainer = styled.div`
   width: 100%;
@@ -22,49 +21,9 @@ const ConverterContainer = styled.div`
   background-color: rgba(0, 0, 0, 0.1);
 `;
 
-const ConverterBackground = styled.img`
-  width: 100%;
-  height: 100%;
-
-  object-fit: cover;
-
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-
-  z-index: -1;
-`;
-
-const ConverterSpreadSheetIcon = styled.img`
-  width: 50px;
-  height: 50px;
-
-  position: absolute;
-  top: 15px;
-  right: 15px;
-
-  &:hover {
-    top: 12px;
-  }
-
-  transition: top 0.5s ease;
-`;
-
-// const JsonIcon = styled.img`
-//   width: 49px;
-//   height: 49px;
-
-//   position: absolute;
-//   top: 15px;
-//   right: 15px;
-// `;
-
 const ConvertMainWrapper = styled.div`
   border-radius: 10px;
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);
-
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 
   overflow: hidden;
 `;
@@ -85,7 +44,7 @@ const ConverterTitleWrap = styled.div`
   justify-content: space-between;
   align-items: center;
 
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.8);
 `;
 
 const ConverterBottomWrap = styled.div`
@@ -97,24 +56,6 @@ const ConverterBottomWrap = styled.div`
 const ConverterTitle = styled.h1`
   font-size: 15px;
   color: white;
-`;
-
-const ConvertRefreshButton = styled.button`
-  background-color: transparent;
-  border: none;
-
-  cursor: pointer;
-
-  &:hover {
-    transform: rotate(360deg);
-  }
-
-  transition: transform 0.5s ease;
-`;
-
-const ConverterRefresh = styled.img`
-  width: 20px;
-  height: 20px;
 `;
 
 const LanguageMenu = styled.div`
@@ -142,30 +83,6 @@ const LanguageTarget = styled.span`
   font-weight: 700;
 `;
 
-const TextInput = styled.input`
-  width: 380px;
-  padding: 8px 5px 8px 5px;
-  margin-left: 10px;
-  outline: 0 none;
-  font-size: 12px;
-
-  border-color: rgba(0, 0, 0, 0.7);
-  border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-
-  color: rgba(0, 0, 0, 0.8);
-
-  &:hover {
-    border-color: rgba(0, 0, 0, 0.5);
-  }
-
-  &:focus {
-    border-color: rgba(0, 0, 0, 0.5);
-  }
-
-  transition: border-color 0.5s ease;
-`;
-
 const DownloadButton = styled.a`
   width: 100%;
   height: ${({ disabled }) => (disabled ? "0px" : "40px")};
@@ -181,7 +98,7 @@ const DownloadButton = styled.a`
 
   cursor: pointer;
 
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.8);
 
   pointer-events: ${({ disabled }) => (disabled ? "none" : "")};
 
@@ -220,21 +137,6 @@ const JsonView = styled.div`
   }
 `;
 
-const LoadingWrap = styled.div`
-  width: 100%;
-  height: 300px;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const LoadingText = styled.span`
-  font-size: 12px;
-
-  color: rgba(0, 0, 0, 0.8);
-`;
-
 const UploadFileInput = styled.input`
   width: 380px;
   padding: 8px 5px 8px 5px;
@@ -243,9 +145,14 @@ const UploadFileInput = styled.input`
 
 const App = () => {
   const [excelData, setExcelData] = useState([]);
-  const [JSON, setJSON] = useState({});
-  const [language, setLanguage] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [jsonData, setJsonData] = useState({});
+  const [jsonUrl, setJsonUrl] = useState("");
   const [selectData, setSelectData] = useState([{ name: "언어를 선택하세요.", value: "" }]);
+
+  const sendMessage = (language, key, index) => {
+    console.log(`[${language}]: ${index + 2}행 ${key} Key 사이에 공백이 존재합니다.`);
+  };
 
   const onUpload = (e) => {
     let JSON = [];
@@ -274,6 +181,14 @@ const App = () => {
       _.forEach(Keys, (key, idx) => {
         if (key !== "String") {
           _.forEach(StringID, (item, index) => {
+            const splitItem = item.split(" ");
+
+            // 중간에 공백이 있을 경우 _ 언더 바 자동 적용
+            if (splitItem.length > 1) {
+              item = splitItem.join("_");
+              sendMessage(key, item, index);
+            }
+
             Convert = {
               ...Convert,
               [key]: { ...Convert[key], [item]: JSON[index][key] },
@@ -285,7 +200,7 @@ const App = () => {
             value: key,
           };
         } else {
-          SelectData[idx] = selectData[0];
+          SelectData[idx] = { name: "언어를 선택하세요.", value: "" };
         }
       });
 
@@ -299,12 +214,59 @@ const App = () => {
   const onSelect = (e) => {
     const { value } = e.target;
 
-    setJSON(excelData[value]);
+    if (value === "") {
+      setFileName("");
+      setJsonData({});
+      setJsonUrl("");
+      return;
+    }
+
+    let defaultJson = null;
+
+    switch (value) {
+      case "Korean":
+        defaultJson = kr;
+        break;
+      case "English":
+        defaultJson = en;
+        break;
+      case "Chinese":
+        defaultJson = zh;
+        break;
+      case "Deutsch":
+        defaultJson = de;
+        break;
+      case "Franch":
+        defaultJson = fr;
+        break;
+      case "Japanese":
+        defaultJson = ja;
+        break;
+      case "Portuguese":
+        defaultJson = pt;
+        break;
+      case "Espanol":
+        defaultJson = es;
+        break;
+      default:
+        break;
+    }
+
+    const root = {
+      default: defaultJson,
+      new: excelData[value],
+    };
+
+    let JsonUrl = "data:application/json;charset=utf-8,";
+    JsonUrl += encodeURIComponent(JSON.stringify(root, null, 2));
+
+    setFileName(`${value}.json`);
+    setJsonData(root);
+    setJsonUrl(JsonUrl);
   };
 
   return (
     <ConverterContainer>
-      <ConverterBackground src={Sky} />
       <ConvertMainWrapper>
         <ConverterTitleWrap>
           <ConverterTitle>LG Converter</ConverterTitle>
@@ -312,7 +274,7 @@ const App = () => {
         <ConverterWrapper>
           <LanguageMenu>
             <LanguageRequired>*</LanguageRequired>
-            <LanguageTarget>파일</LanguageTarget>
+            <LanguageTarget>엑셀</LanguageTarget>
             <UploadFileInput type={"file"} id="excelInput" onChange={onUpload} />
           </LanguageMenu>
           <LanguageMenu>
@@ -321,11 +283,13 @@ const App = () => {
             <SelectBox data={selectData} onSelect={onSelect} />
           </LanguageMenu>
           <JsonView>
-            <ReactJson src={JSON} displayDataTypes={false} iconStyle={"circle"} />
+            <ReactJson src={jsonData} displayDataTypes={false} iconStyle={"circle"} />
           </JsonView>
         </ConverterWrapper>
         <ConverterBottomWrap>
-          <DownloadButton>JSON 다운로드</DownloadButton>
+          <DownloadButton disabled={jsonUrl === ""} href={jsonUrl} id={fileName} download={fileName}>
+            JSON 다운로드
+          </DownloadButton>
         </ConverterBottomWrap>
       </ConvertMainWrapper>
     </ConverterContainer>
