@@ -1,14 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import _ from "lodash";
 import styled from "styled-components";
 import SelectBox from "./SelectBox";
-import ReactJson from "react-json-view";
+// import ReactJson from "react-json-view";
 import Sky from "./image/sky.jpg";
-import Icon from "./image/spreadSheets.png";
-import Refresh from "./image/refresh.jpg";
-import axios from "axios";
-import { kr, en, de, es, fr, ja, pt, zh } from "./defaultLocale";
-// import JsonImage from "./image/json.png";
+import * as XLSX from "xlsx";
+// import { kr, en, de, es, fr, ja, pt, zh } from "./defaultLocale";
 
 const ConverterContainer = styled.div`
   width: 100%;
@@ -38,30 +35,6 @@ const ConverterBackground = styled.img`
 
   z-index: -1;
 `;
-
-const ConverterSpreadSheetIcon = styled.img`
-  width: 50px;
-  height: 50px;
-
-  position: absolute;
-  top: 15px;
-  right: 15px;
-
-  &:hover {
-    top: 12px;
-  }
-
-  transition: top 0.5s ease;
-`;
-
-// const JsonIcon = styled.img`
-//   width: 49px;
-//   height: 49px;
-
-//   position: absolute;
-//   top: 15px;
-//   right: 15px;
-// `;
 
 const ConvertMainWrapper = styled.div`
   border-radius: 10px;
@@ -102,24 +75,6 @@ const ConverterTitle = styled.h1`
   color: white;
 `;
 
-const ConvertRefreshButton = styled.button`
-  background-color: transparent;
-  border: none;
-
-  cursor: pointer;
-
-  &:hover {
-    transform: rotate(360deg);
-  }
-
-  transition: transform 0.5s ease;
-`;
-
-const ConverterRefresh = styled.img`
-  width: 20px;
-  height: 20px;
-`;
-
 const LanguageMenu = styled.div`
   width: 100%;
   display: flex;
@@ -143,30 +98,6 @@ const LanguageTarget = styled.span`
 
   display: block;
   font-weight: 700;
-`;
-
-const TextInput = styled.input`
-  width: 380px;
-  padding: 8px 5px 8px 5px;
-  margin-left: 10px;
-  outline: 0 none;
-  font-size: 12px;
-
-  border-color: rgba(0, 0, 0, 0.7);
-  border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-
-  color: rgba(0, 0, 0, 0.8);
-
-  &:hover {
-    border-color: rgba(0, 0, 0, 0.5);
-  }
-
-  &:focus {
-    border-color: rgba(0, 0, 0, 0.5);
-  }
-
-  transition: border-color 0.5s ease;
 `;
 
 const DownloadButton = styled.a`
@@ -196,352 +127,98 @@ const DownloadButton = styled.a`
   transition: background-color 0.5s ease, color 0.5s ease, height 0.5s ease;
 `;
 
-const JsonView = styled.div`
-  width: 487.66px;
-  margin-top: 15px;
-  max-height: 300px;
-  overflow-y: scroll;
-
-  padding: 10px;
-
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
-
-  &::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
-    background-color: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    border-radius: 3px;
-    background-color: rgba(0, 0, 0, 0.1);
-
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-  }
+const UploadFileInput = styled.input`
+  width: 380px;
+  padding: 8px 5px 8px 5px;
+  margin-left: 10px;
 `;
-
-const LoadingWrap = styled.div`
-  width: 100%;
-  height: 300px;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const LoadingText = styled.span`
-  font-size: 12px;
-
-  color: rgba(0, 0, 0, 0.8);
-`;
-
-const languageData = [
-  { name: "언어를 선택하세요.", value: "" },
-  { name: "한국어", value: "Korean" },
-  { name: "영어", value: "English" },
-  { name: "중국어", value: "Chinese" },
-  { name: "독일어", value: "Deutsch" },
-  { name: "프랑스어", value: "Franch" },
-  { name: "일본어", value: "Japanese" },
-  { name: "포르투갈어", value: "Portuguese" },
-  { name: "스페인어", value: "Espanol" },
-];
 
 const App = () => {
-  const [API_TOKEN, setAPI_TOKEN] = useState(
-    "AIzaSyBiXVHWac0qqPbeW857yGxkeMr5OZ401kM"
-  );
-  const [spreadSheetsId, setSpreadSheetsId] = useState(
-    "1k5Muc1xM3_PP0musMihHJMEkYYarIVSKKERUriHBkV8"
-  );
+  const [excelData, setExcelData] = useState([]);
+  const [JSON, setJSON] = useState({});
+  const [language, setLanguage] = useState("");
+  const [selectData, setSelectData] = useState([{ name: "언어를 선택하세요.", value: "" }]);
 
-  const [stringId, setStringId] = useState([]); // STR_ID 등록
-  const [jsonUrl, setJsonUrl] = useState(""); // JSON 다운로드 주소 생성
-  const [fileName, setFileName] = useState(""); // file 생성 시, JSON 파일 이름 설정
-  const [jsonData, setJsonData] = useState(); // ReactJson View에 표시 할 Json
-  const [loading, setLoading] = useState(true);
-  const [selectLanguage, setSelectLanguage] = useState("");
+  const onUpload = (e) => {
+    let JSON = [];
+    let Keys = [];
+    let StringID = [];
+    let Convert = {};
+    let SelectData = [];
 
-  // SpreacAPI Cell Data
-  const SpreadAPI = async (range) => {
-    let resJson = [];
+    const files = e.target.files[0];
+    const reader = new FileReader();
 
-    try {
-      resJson = await axios.get(
-        `https://sheets.googleapis.com/v4/spreadsheets/${spreadSheetsId}/values/Sheet1!${range}?key=${API_TOKEN}`
-      );
-    } catch (e) {
-      return e;
-    }
+    reader.onload = (event) => {
+      const data = event.target.result;
+      const workBook = XLSX.read(data, { type: "binary" });
 
-    const {
-      data: { values: JSON },
-    } = resJson;
+      _.forEach(workBook.SheetNames, (sheetName) => {
+        JSON = XLSX.utils.sheet_to_json(workBook.Sheets[sheetName]);
+      });
 
-    return JSON ? JSON : resJson;
-  };
+      _.forEach(JSON, (item, index) => {
+        StringID[index] = item.String;
+      });
 
-  // 설정된 Object Key 값 저장
-  const getGoogleSpreadSheetsStringId = async () => {
-    const getData = await SpreadAPI("A2:A9999");
-    setStringId(getData);
-  };
+      Keys = Object.keys(JSON[0]);
 
-  const sendMessage = (idx, type, stringID, where) => {
-    let char01 = `[확인] ${type} : 값 ${where}에 공백이 존재함 `;
-    char01 += `[${idx + 2}번 행] "${stringID}"`;
+      _.forEach(Keys, (key, idx) => {
+        if (key !== "String") {
+          _.forEach(StringID, (item, index) => {
+            Convert = {
+              ...Convert,
+              [key]: { ...Convert[key], [item]: JSON[index][key] },
+            };
+          });
 
-    console.log(char01);
-  };
-
-  // SpreadSheet에서 사용자가 선택한 언어의 JSON 저장
-  const googleSpreadSheetsConnect = async (defaultLocale, range) => {
-    // JSON 임시 저장
-    let language = { default: { ...defaultLocale } };
-
-    // JSON API
-    const getData = await SpreadAPI(range);
-
-    // 오류 발견 시
-    if (getData.code) {
-      setJsonData(getData);
-      setLoading(true);
-      return;
-    }
-
-    _.forEach(getData, (res, index) => {
-      // 설정된 Object Key ( StringID ) 가 존재할 경우
-      let type = "";
-
-      if (stringId[index][0]) {
-        type = "key";
-        const splitChar = stringId[index][0].split(" ");
-
-        if (splitChar.length > 1 && splitChar[1] !== "") {
-          sendMessage(index, type, stringId[index][0], "사이");
-
-          // // 구분 된 ID일 경우 소문자로 변환
-          // stringId[index][0] = stringId[index][0].toLowerCase();
-
-          // " " 공백 부분 제거 후, 배열로 변환 ex) Process Record > ["Process", "Record"];
-          stringId[index][0] = stringId[index][0].split(" ");
-
-          // 문자열 마지막에 공백이 존재하면 공백 제거
-          if (stringId[index][0][stringId[index][0].length - 1] === "") {
-            stringId[index][0] = stringId[index][0].slice(0, -1);
-          }
-
-          // 마지막으로 각 배열 사이에 "_" 추가함 ex) ["Process", "Record"] > Process_Record
-          stringId[index][0] = stringId[index][0].join("_");
+          SelectData[idx] = {
+            name: key,
+            value: key,
+          };
+        } else {
+          SelectData[idx] = selectData[0];
         }
+      });
 
-        if (splitChar[1] === "") {
-          sendMessage(index, type, stringId[index][0], "뒤");
-          stringId[index][0] = stringId[index][0].replaceAll(" ", "");
-        }
-      }
-
-      if (res[0]) {
-        type = "string";
-        let resSplit = res[0].split(" ");
-
-        if (resSplit[resSplit.length - 1] === "") {
-          sendMessage(index, type, res[0], "뒤");
-          res[0] = resSplit.slice(0, -1)[0];
-        }
-      }
-
-      language = {
-        ...language,
-        new_locale: {
-          ...language.new_locale,
-          [stringId[index][0]]: res[0] ? res[0] : "",
-        },
-      };
-    });
-
-    const charset = "data:application/json;charset=utf-8,";
-
-    let JsonUrl = charset;
-    JsonUrl += encodeURIComponent(JSON.stringify(language, null, 2));
-
-    setJsonUrl(JsonUrl);
-    setJsonData(language);
-    setLoading(true);
-  };
-
-  const getLanguage = async (language) => {
-    let range = "";
-    let fileName = "";
-    let defaultLocale = {};
-
-    setLoading(false);
-
-    switch (language) {
-      case "Korean":
-        range = "B2:B9999";
-        fileName = "ko.json";
-        defaultLocale = kr;
-        break;
-      case "English":
-        range = "C2:C9999";
-        fileName = "en.json";
-        defaultLocale = en;
-        break;
-      case "Chinese":
-        range = "D2:D9999";
-        fileName = "zh.json";
-        defaultLocale = zh;
-        break;
-      case "Deutsch":
-        range = "E2:E9999";
-        fileName = "de.json";
-        defaultLocale = de;
-        break;
-      case "Franch":
-        range = "F2:F9999";
-        fileName = "fr.json";
-        defaultLocale = fr;
-        break;
-      case "Japanese":
-        range = "G2:G9999";
-        fileName = "ja.json";
-        defaultLocale = ja;
-        break;
-      case "Portuguese":
-        range = "H2:H9999";
-        fileName = "pt.json";
-        defaultLocale = pt;
-        break;
-      case "Espanol":
-        range = "I2:I9999";
-        fileName = "es.json";
-        defaultLocale = es;
-        break;
-      default:
-        break;
-    }
-
-    googleSpreadSheetsConnect(defaultLocale, range);
-    setFileName(fileName);
-  };
-
-  useEffect(() => {
-    const getSpreadData = async () => {
-      await getGoogleSpreadSheetsStringId();
+      setSelectData(SelectData);
+      setExcelData(Convert);
     };
 
-    getSpreadData();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    reader.readAsBinaryString(files);
+  };
 
   const onSelect = (e) => {
     const { value } = e.target;
 
-    if (value === "") {
-      setSelectLanguage(value);
-      setJsonData();
-      setJsonUrl(value);
-      return;
-    }
-
-    setSelectLanguage(value);
-    getLanguage(value);
+    setLanguage(value);
   };
 
-  const onChange = (e) => {
-    const { name, value } = e.target;
-
-    switch (name) {
-      case "token":
-        setAPI_TOKEN(value);
-        break;
-      case "spread":
-        setSpreadSheetsId(value);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const onRefresh = () => {
-    if (selectLanguage === "") {
-      setJsonData();
-      setJsonUrl(selectLanguage);
-      return;
-    }
-
-    getGoogleSpreadSheetsStringId();
-    getLanguage(selectLanguage);
+  const onDownload = () => {
+    setJSON(excelData[language]);
   };
 
   return (
     <ConverterContainer>
-      <a
-        href={`https://docs.google.com/spreadsheets/d/${spreadSheetsId}/edit#gid=0`}
-        target={"_blank"}
-        rel="noreferrer"
-      >
-        <ConverterSpreadSheetIcon src={Icon} />
-      </a>
-
       <ConverterBackground src={Sky} />
       <ConvertMainWrapper>
         <ConverterTitleWrap>
           <ConverterTitle>LG Converter</ConverterTitle>
-          <ConvertRefreshButton onClick={onRefresh}>
-            <ConverterRefresh src={Refresh} />
-          </ConvertRefreshButton>
         </ConverterTitleWrap>
         <ConverterWrapper>
           <LanguageMenu>
-            <LanguageTarget>API 토큰</LanguageTarget>
-            <TextInput name="token" value={API_TOKEN} onChange={onChange} />
-          </LanguageMenu>
-          <LanguageMenu>
-            <LanguageTarget>스프레드 시트 ID</LanguageTarget>
-            <TextInput
-              name="spread"
-              value={spreadSheetsId}
-              onChange={onChange}
-            />
+            <LanguageRequired>*</LanguageRequired>
+            <LanguageTarget>파일</LanguageTarget>
+            <UploadFileInput type={"file"} id="excelInput" onChange={onUpload} />
           </LanguageMenu>
           <LanguageMenu>
             <LanguageRequired>*</LanguageRequired>
             <LanguageTarget>언어</LanguageTarget>
-            <SelectBox
-              required={jsonUrl === ""}
-              data={languageData}
-              onSelect={onSelect}
-            />
+            <SelectBox data={selectData} onSelect={onSelect} />
           </LanguageMenu>
-          <JsonView>
-            {loading ? (
-              <ReactJson
-                src={jsonData}
-                displayDataTypes={false}
-                iconStyle={"circle"}
-              />
-            ) : (
-              <LoadingWrap>
-                <LoadingText>JSON 파일 생성 중</LoadingText>
-              </LoadingWrap>
-            )}
-          </JsonView>
         </ConverterWrapper>
         <ConverterBottomWrap>
-          <DownloadButton
-            disabled={jsonUrl === ""}
-            href={jsonUrl}
-            id={fileName}
-            download={fileName}
-          >
-            JSON 다운로드
-          </DownloadButton>
+          <DownloadButton onClick={onDownload}>JSON 다운로드</DownloadButton>
         </ConverterBottomWrap>
       </ConvertMainWrapper>
     </ConverterContainer>
