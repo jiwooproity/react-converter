@@ -212,6 +212,7 @@ const App = () => {
   };
 
   const onSelect = (e) => {
+    let fileName = "";
     const { value } = e.target;
 
     if (value === "") {
@@ -225,27 +226,35 @@ const App = () => {
 
     switch (value) {
       case "Korean":
+        fileName = "kr";
         defaultJson = kr;
         break;
       case "English":
+        fileName = "en";
         defaultJson = en;
         break;
       case "Chinese":
+        fileName = "zh";
         defaultJson = zh;
         break;
       case "Deutsch":
+        fileName = "de";
         defaultJson = de;
         break;
       case "Franch":
+        fileName = "fr";
         defaultJson = fr;
         break;
       case "Japanese":
+        fileName = "ja";
         defaultJson = ja;
         break;
       case "Portuguese":
+        fileName = "pt";
         defaultJson = pt;
         break;
       case "Espanol":
+        fileName = "es";
         defaultJson = es;
         break;
       default:
@@ -260,7 +269,7 @@ const App = () => {
     let JsonUrl = "data:application/json;charset=utf-8,";
     JsonUrl += encodeURIComponent(JSON.stringify(root, null, 2));
 
-    setFileName(`${value}.json`);
+    setFileName(`${fileName}.json`);
     setJsonData(root);
     setJsonUrl(JsonUrl);
   };
