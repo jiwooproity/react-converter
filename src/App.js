@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import _ from "lodash";
 import styled from "styled-components";
 import SelectBox from "./SelectBox";
-// import ReactJson from "react-json-view";
+import ReactJson from "react-json-view";
 import Sky from "./image/sky.jpg";
 import * as XLSX from "xlsx";
 // import { kr, en, de, es, fr, ja, pt, zh } from "./defaultLocale";
@@ -35,6 +35,30 @@ const ConverterBackground = styled.img`
 
   z-index: -1;
 `;
+
+const ConverterSpreadSheetIcon = styled.img`
+  width: 50px;
+  height: 50px;
+
+  position: absolute;
+  top: 15px;
+  right: 15px;
+
+  &:hover {
+    top: 12px;
+  }
+
+  transition: top 0.5s ease;
+`;
+
+// const JsonIcon = styled.img`
+//   width: 49px;
+//   height: 49px;
+
+//   position: absolute;
+//   top: 15px;
+//   right: 15px;
+// `;
 
 const ConvertMainWrapper = styled.div`
   border-radius: 10px;
@@ -75,6 +99,24 @@ const ConverterTitle = styled.h1`
   color: white;
 `;
 
+const ConvertRefreshButton = styled.button`
+  background-color: transparent;
+  border: none;
+
+  cursor: pointer;
+
+  &:hover {
+    transform: rotate(360deg);
+  }
+
+  transition: transform 0.5s ease;
+`;
+
+const ConverterRefresh = styled.img`
+  width: 20px;
+  height: 20px;
+`;
+
 const LanguageMenu = styled.div`
   width: 100%;
   display: flex;
@@ -98,6 +140,30 @@ const LanguageTarget = styled.span`
 
   display: block;
   font-weight: 700;
+`;
+
+const TextInput = styled.input`
+  width: 380px;
+  padding: 8px 5px 8px 5px;
+  margin-left: 10px;
+  outline: 0 none;
+  font-size: 12px;
+
+  border-color: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+  color: rgba(0, 0, 0, 0.8);
+
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.5);
+  }
+
+  &:focus {
+    border-color: rgba(0, 0, 0, 0.5);
+  }
+
+  transition: border-color 0.5s ease;
 `;
 
 const DownloadButton = styled.a`
@@ -125,6 +191,48 @@ const DownloadButton = styled.a`
   }
 
   transition: background-color 0.5s ease, color 0.5s ease, height 0.5s ease;
+`;
+
+const JsonView = styled.div`
+  width: 487.66px;
+  margin-top: 15px;
+  max-height: 300px;
+  overflow-y: scroll;
+
+  padding: 10px;
+
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+  }
+`;
+
+const LoadingWrap = styled.div`
+  width: 100%;
+  height: 300px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const LoadingText = styled.span`
+  font-size: 12px;
+
+  color: rgba(0, 0, 0, 0.8);
 `;
 
 const UploadFileInput = styled.input`
@@ -191,11 +299,7 @@ const App = () => {
   const onSelect = (e) => {
     const { value } = e.target;
 
-    setLanguage(value);
-  };
-
-  const onDownload = () => {
-    setJSON(excelData[language]);
+    setJSON(excelData[value]);
   };
 
   return (
@@ -216,9 +320,12 @@ const App = () => {
             <LanguageTarget>언어</LanguageTarget>
             <SelectBox data={selectData} onSelect={onSelect} />
           </LanguageMenu>
+          <JsonView>
+            <ReactJson src={JSON} displayDataTypes={false} iconStyle={"circle"} />
+          </JsonView>
         </ConverterWrapper>
         <ConverterBottomWrap>
-          <DownloadButton onClick={onDownload}>JSON 다운로드</DownloadButton>
+          <DownloadButton>JSON 다운로드</DownloadButton>
         </ConverterBottomWrap>
       </ConvertMainWrapper>
     </ConverterContainer>
