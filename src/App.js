@@ -23,7 +23,8 @@ const ConverterContainer = styled.div`
 
 const ConvertMainWrapper = styled.div`
   border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 
   overflow: hidden;
 `;
@@ -148,13 +149,19 @@ const App = () => {
   const [fileName, setFileName] = useState("");
   const [jsonData, setJsonData] = useState({});
   const [jsonUrl, setJsonUrl] = useState("");
-  const [selectData, setSelectData] = useState([{ name: "언어를 선택하세요.", value: "" }]);
+  const [selectData, setSelectData] = useState([
+    { name: "언어를 선택하세요.", value: "" },
+  ]);
 
   const sendMessage = (language, key, index) => {
-    console.log(`[${language}]: ${index + 2}행 ${key} Key 사이에 공백이 존재합니다.`);
+    console.log(
+      `[${language}]: ${index + 2}행 ${key} Key 사이에 공백이 존재합니다.`
+    );
   };
 
   const onUpload = (e) => {
+    setExcelData([]);
+
     let JSON = [];
     let Keys = [];
     let StringID = [];
@@ -179,12 +186,19 @@ const App = () => {
       Keys = Object.keys(JSON[0]);
 
       _.forEach(Keys, (key, idx) => {
-        if (key !== "String") {
+        if (idx !== 0) {
           _.forEach(StringID, (item, index) => {
-            const splitItem = item.split(" ");
+            if (!item) {
+              let msg = `[${index + 2}]번 행에`;
+              msg += " 값이 없는 String ID가 있습니다.";
+              setJsonData({ msg });
+            } else {
+              setJsonData({});
+            }
 
             // 중간에 공백이 있을 경우 _ 언더 바 자동 적용
-            if (splitItem.length > 1) {
+            if (item.split(" ").length > 1) {
+              const splitItem = item.split(" ");
               item = splitItem.join("_");
               sendMessage(key, item, index);
             }
@@ -284,7 +298,11 @@ const App = () => {
           <LanguageMenu>
             <LanguageRequired>*</LanguageRequired>
             <LanguageTarget>엑셀</LanguageTarget>
-            <UploadFileInput type={"file"} id="excelInput" onChange={onUpload} />
+            <UploadFileInput
+              type={"file"}
+              id="excelInput"
+              onChange={onUpload}
+            />
           </LanguageMenu>
           <LanguageMenu>
             <LanguageRequired>*</LanguageRequired>
@@ -292,11 +310,20 @@ const App = () => {
             <SelectBox data={selectData} onSelect={onSelect} />
           </LanguageMenu>
           <JsonView>
-            <ReactJson src={jsonData} displayDataTypes={false} iconStyle={"circle"} />
+            <ReactJson
+              src={jsonData}
+              displayDataTypes={false}
+              iconStyle={"circle"}
+            />
           </JsonView>
         </ConverterWrapper>
         <ConverterBottomWrap>
-          <DownloadButton disabled={jsonUrl === ""} href={jsonUrl} id={fileName} download={fileName}>
+          <DownloadButton
+            disabled={jsonUrl === ""}
+            href={jsonUrl}
+            id={fileName}
+            download={fileName}
+          >
             JSON 다운로드
           </DownloadButton>
         </ConverterBottomWrap>
