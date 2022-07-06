@@ -34,7 +34,12 @@ const SelectBox = (props) => {
   return (
     <SelectBoxElement onChange={onSelect} required={required}>
       {_.map(data, (item, index) => (
-        <SelectBoxOption key={index} value={item.value} id={item.id}>
+        <SelectBoxOption
+          key={index}
+          value={item.value}
+          id={item.id}
+          defaultValue={""}
+        >
           {item.name}
         </SelectBoxOption>
       ))}

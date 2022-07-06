@@ -160,13 +160,16 @@ const App = () => {
   };
 
   const onUpload = (e) => {
-    setExcelData([]);
-
     let JSON = [];
     let Keys = [];
     let StringID = [];
     let Convert = {};
+    let ErrorMsg = {};
     let SelectData = [];
+
+    setJsonData({});
+    setExcelData([]);
+    setSelectData([{ name: "언어를 선택하세요.", value: "" }]);
 
     const files = e.target.files[0];
     const reader = new FileReader();
@@ -191,13 +194,11 @@ const App = () => {
             if (!item) {
               let msg = `[${index + 2}]번 행에`;
               msg += " 값이 없는 String ID가 있습니다.";
-              setJsonData({ msg });
-            } else {
-              setJsonData({});
+              ErrorMsg = { ...ErrorMsg, [`${index + 2}번 행`]: msg };
             }
 
             // 중간에 공백이 있을 경우 _ 언더 바 자동 적용
-            if (item.split(" ").length > 1) {
+            if (item && item.split(" ").length > 1) {
               const splitItem = item.split(" ");
               item = splitItem.join("_");
               sendMessage(key, item, index);
@@ -218,8 +219,12 @@ const App = () => {
         }
       });
 
-      setSelectData(SelectData);
-      setExcelData(Convert);
+      if (!_.isEmpty(ErrorMsg)) {
+        setJsonData(ErrorMsg);
+      } else {
+        setSelectData(SelectData);
+        setExcelData(Convert);
+      }
     };
 
     reader.readAsBinaryString(files);
