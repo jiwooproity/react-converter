@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import _ from "lodash";
 import styled from "styled-components";
 import SelectBox from "./SelectBox";
@@ -142,6 +142,53 @@ const UploadFileInput = styled.input`
   width: 380px;
   padding: 8px 5px 8px 5px;
   margin-left: 10px;
+  display: none;
+`;
+
+const UploadFileInputStyle = styled.label`
+  width: 380px;
+  font-size: 12px;
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const UploadFileInputText = styled.span`
+  width: 320px;
+  font-size: 12px;
+  padding: 8px 5px 8px 5px;
+
+  border-bottom: ${({ required }) =>
+    required
+      ? "1px solid rgba(165, 0, 52, 0.3)"
+      : "1px solid rgba(0, 0, 0, 0.1)"};
+
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.5);
+  }
+
+  &:focus {
+    border-color: rgba(0, 0, 0, 0.5);
+  }
+
+  transition: border-color 0.5s ease;
+`;
+
+const UploadFileInputButton = styled.button`
+  padding: 7px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+
+  &:hover {
+    background-color: #a50034;
+    color: white;
+  }
+
+  transition: background-color 0.5s ease;
 `;
 
 const App = () => {
@@ -149,9 +196,14 @@ const App = () => {
   const [fileName, setFileName] = useState("");
   const [jsonData, setJsonData] = useState({});
   const [jsonUrl, setJsonUrl] = useState("");
+  const [uploadFileName, setUploadFileName] = useState(
+    "JSON으로 변환 할 엑셀 파일을 등록 해 주세요."
+  );
   const [selectData, setSelectData] = useState([
     { name: "언어를 선택하세요.", value: "" },
   ]);
+
+  const inputRef = useRef(null);
 
   const sendMessage = (language, key, index) => {
     console.log(
@@ -172,7 +224,14 @@ const App = () => {
     setSelectData([{ name: "언어를 선택하세요.", value: "" }]);
 
     const files = e.target.files[0];
+    const filesName = files.name;
     const reader = new FileReader();
+
+    const volume = ["bytes", "KB", "MB", "GB", "TB", "PB"];
+    const isByte = Math.floor(Math.log(files.size) / Math.log(1024));
+    let math = files.size / Math.pow(1024, Math.floor(isByte));
+    math = math.toFixed(2);
+    math += ` ${volume[isByte]}`;
 
     reader.onload = (event) => {
       const data = event.target.result;
@@ -218,6 +277,8 @@ const App = () => {
           SelectData[idx] = { name: "언어를 선택하세요.", value: "" };
         }
       });
+
+      setUploadFileName(`${filesName} / ${math}`);
 
       if (!_.isEmpty(ErrorMsg)) {
         setJsonData(ErrorMsg);
@@ -307,7 +368,15 @@ const App = () => {
               type={"file"}
               id="excelInput"
               onChange={onUpload}
+              ref={inputRef}
+              accept={".xls,.xlsx"}
             />
+            <UploadFileInputStyle>
+              <UploadFileInputText>{uploadFileName}</UploadFileInputText>
+              <UploadFileInputButton onClick={() => inputRef.current.click()}>
+                등록
+              </UploadFileInputButton>
+            </UploadFileInputStyle>
           </LanguageMenu>
           <LanguageMenu>
             <LanguageRequired>*</LanguageRequired>
