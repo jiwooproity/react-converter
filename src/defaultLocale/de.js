@@ -42,8 +42,7 @@ export const de = {
   sign_out: "Abmelden",
   locked: "Gesperrt",
   grant_connect: "Verbindung erlauben",
-  connect_after_certain_time:
-    "Verbindung nach einem festgelegten Zeitraum herstellen",
+  connect_after_certain_time: "Verbindung nach einem festgelegten Zeitraum herstellen",
   instant_connect: "Sofortige Verbindung",
   none: "Keine",
   ethernet: "Ethernet",

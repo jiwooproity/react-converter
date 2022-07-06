@@ -1,4 +1,8 @@
-export const kr = {
+export let kr = `
+import { defineMessages } from 'react-intl';
+import common from "./common";
+
+const value = {
   on: "켜짐",
   off: "꺼짐",
   send_message: "메시지 전송",
@@ -52,3 +56,7 @@ export const kr = {
   reset_password_when_login: "로그인 시 비밀번호 재설정",
   login_with_password: "패스워드로 로그인",
 };
+
+const messages = defineMessages({
+  ...common,
+`;

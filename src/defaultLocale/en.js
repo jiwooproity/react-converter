@@ -1,4 +1,8 @@
-export const en = {
+export let en = `
+import { defineMessages } from 'react-intl';
+import common from "./common";
+
+const value = {
   on: "On",
   off: "Off",
   send_message: "Send Message",
@@ -52,3 +56,7 @@ export const en = {
   reset_password_when_login: "Reset password when log-in",
   login_with_password: "Log-in with password",
 };
+
+const messages = defineMessages({
+  ...common,
+`;

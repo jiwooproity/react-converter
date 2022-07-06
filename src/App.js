@@ -38,18 +38,13 @@ const App = () => {
 
   const onUpload = (e) => {
     let JSON = [];
-    let Keys = [];
-    let StringID = [];
-    let Convert = {};
-    let ErrorMsg = {};
-    let SelectData = [];
+    let sheetStr = {};
 
     setJsonData({});
     setExcelData([]);
     setSelectData([{ name: "언어를 선택하세요.", value: "" }]);
 
     const files = e.target.files[0];
-    const filesName = files.name;
     const reader = new FileReader();
 
     reader.onload = (event) => {
@@ -60,120 +55,25 @@ const App = () => {
         JSON[index] = XLSX.utils.sheet_to_json(workBook.Sheets[sheetName]);
       });
 
-      _.forEach(JSON[2], (item, index) => {
-        StringID[index] = item.Str_ID;
+      let predefined = [];
+      let string = [];
+
+      _.forEach(JSON[1], (json, index) => {
+        predefined[index] = json.value;
       });
 
-      Keys = Object.keys(JSON[2][0]);
-
-      // Keys: [ Korean, English, ... ]
-      _.forEach(Keys, (key, idx) => {
-        if (idx !== 0) {
-          // StringID: [ language, system_language, ... ]
-          _.forEach(StringID, (item, index) => {
-            if (JSON[2][index]["삭제"] === undefined) {
-              // JSON의 키가 될 데이터가 존재하지 않을 경우 처리 ( 오류 )
-
-              // 중간에 공백이 있을 경우 _ 언더 바 자동 적용
-              if (item && item.split(" ").length > 1) {
-                const splitItem = item.split(" ");
-                item = splitItem.join("_");
-              }
-
-              // ... { ...Convert, * [Korean]: { ...Convert[key], [language]: "언어" } * }
-              Convert = {
-                ...Convert,
-                [key]: { ...Convert[key], [item]: JSON[2][index][key] },
-              };
-            }
-          });
-
-          // SELECT BOX 할당
-          SelectData[idx] = {
-            name: key,
-            value: key,
-          };
-        } else {
-          // SELECT BOX 기본 값 설정
-          SelectData[idx] = { name: "언어를 선택하세요.", value: "" };
-        }
+      _.forEach(JSON[2], (json, index) => {
+        string[index] = json.Str_ID;
       });
 
-      setUploadFileName(`${filesName}`);
-
-      if (!_.isEmpty(ErrorMsg)) {
-        setJsonData(ErrorMsg);
-      } else {
-        setSelectData(SelectData);
-        setExcelData(Convert);
-      }
+      console.log(predefined);
+      console.log(string);
     };
 
     reader.readAsBinaryString(files);
   };
 
-  const onSelect = (e) => {
-    let fileName = "";
-    const { value } = e.target;
-
-    if (value === "") {
-      setFileName("");
-      setJsonData({});
-      setJsonUrl("");
-      return;
-    }
-
-    let defaultJson = null;
-
-    switch (value) {
-      case "Korean":
-        fileName = "kr";
-        defaultJson = kr;
-        break;
-      case "English":
-        fileName = "en";
-        defaultJson = en;
-        break;
-      case "Chinese":
-        fileName = "zh";
-        defaultJson = zh;
-        break;
-      case "Deutsch":
-        fileName = "de";
-        defaultJson = de;
-        break;
-      case "Franch":
-        fileName = "fr";
-        defaultJson = fr;
-        break;
-      case "Japanese":
-        fileName = "ja";
-        defaultJson = ja;
-        break;
-      case "Portuguese":
-        fileName = "pt";
-        defaultJson = pt;
-        break;
-      case "Espanol":
-        fileName = "es";
-        defaultJson = es;
-        break;
-      default:
-        break;
-    }
-
-    const root = {
-      default: defaultJson,
-      new: excelData[value],
-    };
-
-    let JsonUrl = "data:application/json;charset=utf-8,";
-    JsonUrl += encodeURIComponent(JSON.stringify(root, null, 2));
-
-    setFileName(`${fileName}.json`);
-    setJsonData(root);
-    setJsonUrl(JsonUrl);
-  };
+  const onSelect = (e) => {};
 
   return (
     <ConverterContainer>
