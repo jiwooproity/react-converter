@@ -31,20 +31,10 @@ const App = () => {
   const [fileName, setFileName] = useState("");
   const [jsonData, setJsonData] = useState({});
   const [jsonUrl, setJsonUrl] = useState("");
-  const [uploadFileName, setUploadFileName] = useState(
-    "JSON으로 변환 할 엑셀 파일을 등록 해 주세요."
-  );
-  const [selectData, setSelectData] = useState([
-    { name: "언어를 선택하세요.", value: "" },
-  ]);
+  const [uploadFileName, setUploadFileName] = useState("JSON으로 변환 할 엑셀 파일을 등록 해 주세요.");
+  const [selectData, setSelectData] = useState([{ name: "언어를 선택하세요.", value: "" }]);
 
   const inputRef = useRef(null);
-
-  const sendMessage = (language, key, index) => {
-    console.log(
-      `[${language}]: ${index + 2}행 ${key} Key 사이에 공백이 존재합니다.`
-    );
-  };
 
   const onUpload = (e) => {
     let JSON = [];
@@ -62,50 +52,40 @@ const App = () => {
     const filesName = files.name;
     const reader = new FileReader();
 
-    const volume = ["bytes", "KB", "MB", "GB", "TB", "PB"];
-    const isByte = Math.floor(Math.log(files.size) / Math.log(1024));
-    let math = files.size / Math.pow(1024, Math.floor(isByte));
-    math = math.toFixed(2);
-    math += ` ${volume[isByte]}`;
-
     reader.onload = (event) => {
       const data = event.target.result;
       const workBook = XLSX.read(data, { type: "binary" });
 
-      _.forEach(workBook.SheetNames, (sheetName) => {
-        JSON = XLSX.utils.sheet_to_json(workBook.Sheets[sheetName]);
+      _.forEach(workBook.SheetNames, (sheetName, index) => {
+        JSON[index] = XLSX.utils.sheet_to_json(workBook.Sheets[sheetName]);
       });
 
-      _.forEach(JSON, (item, index) => {
-        StringID[index] = item.String;
+      _.forEach(JSON[2], (item, index) => {
+        StringID[index] = item.Str_ID;
       });
 
-      Keys = Object.keys(JSON[0]);
+      Keys = Object.keys(JSON[2][0]);
 
       // Keys: [ Korean, English, ... ]
       _.forEach(Keys, (key, idx) => {
         if (idx !== 0) {
           // StringID: [ language, system_language, ... ]
           _.forEach(StringID, (item, index) => {
-            // JSON의 키가 될 데이터가 존재하지 않을 경우 처리 ( 오류 )
-            if (!item) {
-              let msg = `[${index + 2}]번 행에`;
-              msg += " 값이 없는 String ID가 있습니다.";
-              ErrorMsg = { ...ErrorMsg, [`${index + 2}번 행`]: msg };
-            }
+            if (JSON[2][index]["삭제"] === undefined) {
+              // JSON의 키가 될 데이터가 존재하지 않을 경우 처리 ( 오류 )
 
-            // 중간에 공백이 있을 경우 _ 언더 바 자동 적용
-            if (item && item.split(" ").length > 1) {
-              const splitItem = item.split(" ");
-              item = splitItem.join("_");
-              sendMessage(key, item, index);
-            }
+              // 중간에 공백이 있을 경우 _ 언더 바 자동 적용
+              if (item && item.split(" ").length > 1) {
+                const splitItem = item.split(" ");
+                item = splitItem.join("_");
+              }
 
-            // ... { ...Convert, * [Korean]: { ...Convert[key], [language]: "언어" } * }
-            Convert = {
-              ...Convert,
-              [key]: { ...Convert[key], [item]: JSON[index][key] },
-            };
+              // ... { ...Convert, * [Korean]: { ...Convert[key], [language]: "언어" } * }
+              Convert = {
+                ...Convert,
+                [key]: { ...Convert[key], [item]: JSON[2][index][key] },
+              };
+            }
           });
 
           // SELECT BOX 할당
@@ -119,7 +99,7 @@ const App = () => {
         }
       });
 
-      setUploadFileName(`${filesName} / ${math}`);
+      setUploadFileName(`${filesName}`);
 
       if (!_.isEmpty(ErrorMsg)) {
         setJsonData(ErrorMsg);
@@ -205,18 +185,10 @@ const App = () => {
           <LanguageMenu>
             <LanguageRequired>*</LanguageRequired>
             <LanguageTarget>엑셀</LanguageTarget>
-            <UploadFileInput
-              type={"file"}
-              id="excelInput"
-              onChange={onUpload}
-              ref={inputRef}
-              accept={".xls,.xlsx"}
-            />
+            <UploadFileInput type={"file"} id="excelInput" onChange={onUpload} ref={inputRef} accept={".xls,.xlsx"} />
             <UploadFileInputStyle>
               <UploadFileInputText>{uploadFileName}</UploadFileInputText>
-              <UploadFileInputButton onClick={() => inputRef.current.click()}>
-                등록
-              </UploadFileInputButton>
+              <UploadFileInputButton onClick={() => inputRef.current.click()}>등록</UploadFileInputButton>
             </UploadFileInputStyle>
           </LanguageMenu>
           <LanguageMenu>
@@ -225,20 +197,11 @@ const App = () => {
             <SelectBox data={selectData} onSelect={onSelect} />
           </LanguageMenu>
           <JsonView>
-            <ReactJson
-              src={jsonData}
-              displayDataTypes={false}
-              iconStyle={"circle"}
-            />
+            <ReactJson src={jsonData} displayDataTypes={false} iconStyle={"circle"} />
           </JsonView>
         </ConverterWrapper>
         <ConverterBottomWrap>
-          <DownloadButton
-            disabled={jsonUrl === ""}
-            href={jsonUrl}
-            id={fileName}
-            download={fileName}
-          >
+          <DownloadButton disabled={jsonUrl === ""} href={jsonUrl} id={fileName} download={fileName}>
             JSON 다운로드
           </DownloadButton>
         </ConverterBottomWrap>
