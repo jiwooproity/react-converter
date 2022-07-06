@@ -247,9 +247,12 @@ const App = () => {
 
       Keys = Object.keys(JSON[0]);
 
+      // Keys: [ Korean, English, ... ]
       _.forEach(Keys, (key, idx) => {
         if (idx !== 0) {
+          // StringID: [ language, system_language, ... ]
           _.forEach(StringID, (item, index) => {
+            // JSON의 키가 될 데이터가 존재하지 않을 경우 처리 ( 오류 )
             if (!item) {
               let msg = `[${index + 2}]번 행에`;
               msg += " 값이 없는 String ID가 있습니다.";
@@ -263,17 +266,20 @@ const App = () => {
               sendMessage(key, item, index);
             }
 
+            // ... { ...Convert, * [Korean]: { ...Convert[key], [language]: "언어" } * }
             Convert = {
               ...Convert,
               [key]: { ...Convert[key], [item]: JSON[index][key] },
             };
           });
 
+          // SELECT BOX 할당
           SelectData[idx] = {
             name: key,
             value: key,
           };
         } else {
+          // SELECT BOX 기본 값 설정
           SelectData[idx] = { name: "언어를 선택하세요.", value: "" };
         }
       });
