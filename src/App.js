@@ -45,8 +45,8 @@ const App = () => {
 
   // 아래 JSON 프리 뷰에 띄어 줄 데이터 목록 설정
   const [jsonData, setJsonData] = useState({
-    deletes: {},
-    errorMsg: {},
+    Deleted: {},
+    ErrorMessage: {},
   });
 
   const [uploadFileName, setUploadFileName] = useState(
@@ -67,8 +67,8 @@ const App = () => {
     setJsonUrl("");
     setSelectData([{ name: "언어를 선택하세요.", value: "" }]);
     setJsonData({
-      deletes: {},
-      errorMsg: {},
+      Deleted: {},
+      ErrorMessage: {},
     });
 
     let JSON = [];
@@ -139,9 +139,9 @@ const App = () => {
       // 선택 박스 데이터
       let SelectData = [];
       // 에러 발생 시 메세지
-      let errorMsg = {};
+      let ErrorMessage = {};
       // 삭제 컬럼 활성화 된 데이터 저장
-      let deletes = {};
+      let Deleted = {};
 
       // const value = {} 안에 입력 될 데이터 설정 ( 문자열로 가공 )
       _.forEach(sheetKey.predefined, (preKey, keyIdx) => {
@@ -165,19 +165,56 @@ const App = () => {
           let test = [];
 
           _.forEach(sheetStr.string, (strStr, strIdx) => {
+            // ----------------------- 오류 체크 -----------------------
             // 중복 키 체크
             if (test.includes(strStr)) {
-              errorMsg = {
-                ...errorMsg,
-                [`${[strIdx + 2]}번 행`]: `${strStr} 중복 키`,
+              ErrorMessage = {
+                ...ErrorMessage,
+                "DUPLICATE.ERROR": {
+                  ...ErrorMessage["DUPLICATE.ERROR"],
+                  [`Str_ID ${[
+                    strIdx + 2,
+                  ]}번 행`]: `${strStr} 중복 키가 존재합니다.`,
+                },
               };
             }
 
+            // 줄바꿈 제거 필요 알림
+            if (
+              JSON[2][strIdx][strKey] &&
+              JSON[2][strIdx][strKey].split("\n").length &&
+              JSON[2][strIdx][strKey].split("\n").length > 1
+            ) {
+              ErrorMessage = {
+                ...ErrorMessage,
+                "SPACE_BAR.ERROR": {
+                  ...ErrorMessage["SPACE_BAR.ERROR"],
+                  [`${strKey} ${[
+                    strIdx + 2,
+                  ]}번 행`]: `해당 값에 줄바꿈이 존재합니다.`,
+                },
+              };
+            }
+
+            // STR_ID가 존재하지 않을 경우
+            if (strStr === undefined) {
+              ErrorMessage = {
+                ...ErrorMessage,
+                "STR_ID.ERROR": {
+                  ...ErrorMessage["STR_ID.ERROR"],
+                  [`Str_ID ${[
+                    strIdx + 2,
+                  ]}번 행`]: `STR_ID 키 값이 입력되지 않았습니다.`,
+                },
+              };
+            }
+            // ----------------------- 오류 체크 -----------------------
+
             // 삭제 컬럼 체크
             if (JSON[2][strIdx]["삭제"] !== undefined) {
-              deletes = {
-                ...deletes,
-                [strStr]: `${strIdx + 2}번 행 삭제되었습니다.`,
+              Deleted = {
+                ...Deleted,
+                [strStr]: `${strIdx + 2}번 행이 삭제되었습니다.`,
               };
             } else {
               // Develop / Release 모드 유무
@@ -199,11 +236,14 @@ const App = () => {
                       : '"' + JSON[2][strIdx][strKey].toString() + '"'
                   } ,\n`;
                 } else {
-                  errorMsg = {
-                    ...errorMsg,
-                    [`${strKey} ${[
-                      strIdx + 2,
-                    ]}번 행`]: `${strStr} 값이 없습니다.`,
+                  ErrorMessage = {
+                    ...ErrorMessage,
+                    "NONE.ERROR": {
+                      ...ErrorMessage["NONE.ERROR"],
+                      [`${strKey} ${[
+                        strIdx + 2,
+                      ]}번 행`]: `${strStr} 값이 없습니다.`,
+                    },
                   };
                 }
               }
@@ -227,14 +267,14 @@ const App = () => {
       // 현재 업로드 된 파일의 이름 저장
       setUploadFileName(filesName);
 
-      if (!_.isEmpty(errorMsg)) {
-        setJsonData({ deletes, errorMsg });
+      if (!_.isEmpty(ErrorMessage)) {
+        setJsonData({ Deleted, ErrorMessage });
       } else {
         setSelectData(SelectData);
         setPreString(preLanguage);
         setStrString(strLanguage);
 
-        setJsonData({ deletes, errorMsg });
+        setJsonData({ Deleted, ErrorMessage });
       }
     };
 
@@ -294,10 +334,11 @@ const App = () => {
   // 모드 변경할 때마다 초기화 작업
   useEffect(() => {
     setJsonData({
-      deletes: {},
-      errorMsg: {},
+      Deleted: {},
+      ErrorMessage: {},
     });
 
+    setUploadFileName("JSON으로 변환 할 엑셀 파일을 등록 해 주세요.");
     setSelectData([{ name: "언어를 선택하세요.", value: "" }]);
     setFileName("");
     setJsonUrl("");

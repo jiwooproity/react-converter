@@ -55,7 +55,7 @@ export const ConverterTitle = styled.h1`
 export const LanguageMenu = styled.div`
   width: 100%;
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
   list-style: none;
 
@@ -105,7 +105,7 @@ export const DownloadButton = styled.a`
 `;
 
 export const JsonView = styled.div`
-  width: 487.66px;
+  width: 550px;
   margin-top: 15px;
   max-height: 300px;
   overflow-y: scroll;
@@ -132,14 +132,14 @@ export const JsonView = styled.div`
 `;
 
 export const UploadFileInput = styled.input`
-  width: 380px;
+  width: 510px;
   padding: 8px 5px 8px 5px;
   margin-left: 10px;
   display: none;
 `;
 
 export const UploadFileInputStyle = styled.label`
-  width: 380px;
+  width: 510px;
   font-size: 12px;
   margin-left: 10px;
   display: flex;
@@ -148,7 +148,7 @@ export const UploadFileInputStyle = styled.label`
 `;
 
 export const UploadFileInputText = styled.span`
-  width: 320px;
+  width: 450px;
   font-size: 12px;
   padding: 8px 5px 8px 5px;
 
@@ -185,7 +185,7 @@ export const UploadFileInputButton = styled.button`
 `;
 
 export const UploadModeWrap = styled.div`
-  width: 380px;
+  width: 510px;
   margin-left: 10px;
 
   display: flex;
