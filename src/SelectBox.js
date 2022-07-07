@@ -3,7 +3,7 @@ import _ from "lodash";
 import styled from "styled-components";
 
 const SelectBoxElement = styled.select`
-  width: 380px;
+  width: 510px;
   padding: 8px 5px 8px 0px;
   border: none;
   margin-left: 10px;
