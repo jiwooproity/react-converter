@@ -327,6 +327,14 @@ const App = () => {
       case "Spanish":
         fileName = "es.js";
         break;
+      case "":
+        fileName = "";
+        setJsonData({
+          Deleted: {},
+          ErrorMessage: {},
+        });
+        setJsonUrl("");
+        return;
       default:
         break;
     }
