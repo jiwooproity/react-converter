@@ -1,3 +1,4 @@
-import { kr } from "./kr";
+import { message } from "./message";
+import { string } from "./string";
 
-export { kr };
+export { message, string };

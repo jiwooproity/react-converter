@@ -3,7 +3,6 @@ import styled from "styled-components";
 export const ConverterContainer = styled.div`
   width: 100%;
   height: 100vh;
-  padding: 20px 20px 20px 20px;
 
   position: relative;
 
@@ -187,4 +186,28 @@ export const UploadFileInputButton = styled.button`
 
 export const UploadModeWrap = styled.div`
   width: 380px;
+  margin-left: 10px;
+
+  display: flex;
+  justify-content: flex-start;
+`;
+
+export const UploadModeButton = styled.button`
+  padding: 6px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  color: white;
+  margin-right: 2px;
+  background-color: ${({ active }) =>
+    active ? "#a50034" : "rgba(0, 0, 0, 0.8)"};
+
+  &:hover {
+    background-color: #a50034;
+    color: white;
+  }
+
+  transition: background-color 0.5s ease;
+
+  cursor: pointer;
 `;

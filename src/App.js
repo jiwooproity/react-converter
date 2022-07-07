@@ -1,10 +1,14 @@
-import React, { useRef, useState } from "react";
-
+import React, { useEffect, useRef, useState } from "react";
 import _ from "lodash";
+
 import * as XLSX from "xlsx";
+import ReactJson from "react-json-view";
 
-import { string } from "./defaultLocale/string";
+import SelectBox from "./SelectBox";
 
+import { string, message } from "./defaultLocale";
+
+// CSS 스타일
 import {
   ConvertMainWrapper,
   ConverterBottomWrap,
@@ -21,18 +25,25 @@ import {
   UploadFileInputButton,
   JsonView,
   DownloadButton,
+  UploadModeWrap,
+  UploadModeButton,
 } from "./style/Styled";
 
-import SelectBox from "./SelectBox";
-import ReactJson from "react-json-view";
-import { message } from "./defaultLocale/message";
-
 const App = () => {
+  // 1번 시트 value 값
   const [preString, setPreString] = useState("");
+  // 2번 시트 defineMessage 영역 값
   const [strString, setStrString] = useState("");
+
+  // 다운로드 될 파일의 이름 설정 EX) kr.js .. en.js 등
   const [fileName, setFileName] = useState("");
+  // 다운로드 요청을 받을 URL 설정
   const [jsonUrl, setJsonUrl] = useState("");
 
+  // Develop / Release 모드 설정
+  const [mode, setMode] = useState(true);
+
+  // 아래 JSON 프리 뷰에 띄어 줄 데이터 목록 설정
   const [jsonData, setJsonData] = useState({
     deletes: {},
     errorMsg: {},
@@ -47,6 +58,10 @@ const App = () => {
   ]);
 
   const inputRef = useRef(null);
+
+  const onMode = (on) => {
+    setMode(on);
+  };
 
   const onUpload = (e) => {
     setJsonUrl("");
@@ -73,50 +88,62 @@ const App = () => {
     const reader = new FileReader();
 
     reader.onload = (event) => {
+      // reader로 읽어온 엑셀 가공
       const data = event.target.result;
+      // XLSX 라이브러리
       const workBook = XLSX.read(data, { type: "binary" });
 
+      // 각 시트 데이터 이름 및 데이터 저장
       _.forEach(workBook.SheetNames, (sheetName, index) => {
         JSON[index] = XLSX.utils.sheet_to_json(workBook.Sheets[sheetName]);
       });
 
+      // 두번째 시트 VALUE 키 값 저장
       _.forEach(JSON[1], (json, index) => {
         sheetStr.predefined[index] = json.value;
       });
 
+      // 세번째 시트 STR_ID 키 값 저장
       _.forEach(JSON[2], (json, index) => {
         sheetStr.string[index] = json.Str_ID;
       });
 
+      // 각 시트에 존재하는 컬럼 데이터 저장 EX) ["STR_ID", "Korean", "English"]
       sheetKey.predefined = Object.keys(JSON[1][0]);
       sheetKey.string = Object.keys(JSON[2][0]);
 
+      // const value = {} 시트 2
       let preLanguage = {
         Korean: "",
-        English: "",
+        "English(US)": "",
         Chinese: "",
         French: "",
         German: "",
         Japanese: "",
-        Portuguese: "",
+        "Portuguese(Brazilian)": "",
         Spanish: "",
       };
 
+      // const message = defineMessages({}) 시트 3
       let strLanguage = {
         Korean: "",
-        English: "",
+        "English(US)": "",
         Chinese: "",
         French: "",
         German: "",
         Japanese: "",
-        Portuguese: "",
+        "Portuguese(Brazilian)": "",
         Spanish: "",
       };
 
+      // 선택 박스 데이터
       let SelectData = [];
+      // 에러 발생 시 메세지
       let errorMsg = {};
+      // 삭제 컬럼 활성화 된 데이터 저장
       let deletes = {};
 
+      // const value = {} 안에 입력 될 데이터 설정 ( 문자열로 가공 )
       _.forEach(sheetKey.predefined, (preKey, keyIdx) => {
         if (keyIdx !== 0) {
           _.forEach(sheetStr.predefined, (preStr, strIdx) => {
@@ -130,10 +157,11 @@ const App = () => {
         }
       });
 
+      // const message = defineMessages({}) 안에 입력 될 데이터 설정 ( 문자열로 가공 )
       _.forEach(sheetKey.string, (strKey, keyIdx) => {
-        const chkColumn = ["신규", "수정", "삭제", "사용처"];
+        const chkColumn = ["Comments", "신규", "수정", "삭제", "사용처"];
 
-        if (keyIdx !== 0 && !strKey.includes(chkColumn)) {
+        if (keyIdx !== 0 && !chkColumn.includes(strKey)) {
           let test = [];
 
           _.forEach(sheetStr.string, (strStr, strIdx) => {
@@ -149,18 +177,39 @@ const App = () => {
             if (JSON[2][strIdx]["삭제"] !== undefined) {
               deletes = {
                 ...deletes,
-                [`${strStr}`]: `${strIdx + 2}번 행 삭제되었습니다.`,
+                [strStr]: `${strIdx + 2}번 행 삭제되었습니다.`,
               };
             } else {
-              if (JSON[2][strIdx][strKey] !== undefined) {
-                strLanguage[strKey] += `\t${strStr} : ${
-                  JSON[2][strIdx][strKey].toString().indexOf("value.") >= 0
-                    ? JSON[2][strIdx][strKey].toString()
-                    : '"' + JSON[2][strIdx][strKey].toString() + '"'
-                } ,\n`;
+              // Develop / Release 모드 유무
+              if (mode) {
+                // Develop 모드 일 경우, 값이 하나라도 존재하지 않더라도 해당 값은 제외시키고 JS 파일 생성
+                if (JSON[2][strIdx][strKey] !== undefined) {
+                  strLanguage[strKey] += `\t${strStr} : ${
+                    JSON[2][strIdx][strKey].toString().indexOf("value.") >= 0
+                      ? JSON[2][strIdx][strKey].toString()
+                      : '"' + JSON[2][strIdx][strKey].toString() + '"'
+                  } ,\n`;
+                }
+              } else {
+                // Release 모드 일 경우, 값이 하나라도 존재하지 않으면 에러 메세지 출력 및 JS 생성 및 다운로드 차단
+                if (JSON[2][strIdx][strKey] !== undefined) {
+                  strLanguage[strKey] += `\t${strStr} : ${
+                    JSON[2][strIdx][strKey].toString().indexOf("value.") >= 0
+                      ? JSON[2][strIdx][strKey].toString()
+                      : '"' + JSON[2][strIdx][strKey].toString() + '"'
+                  } ,\n`;
+                } else {
+                  errorMsg = {
+                    ...errorMsg,
+                    [`${strKey} ${[
+                      strIdx + 2,
+                    ]}번 행`]: `${strStr} 값이 없습니다.`,
+                  };
+                }
               }
             }
 
+            // 키 값 중복 체크를 위해 배열에 저장
             test[strIdx] = strStr;
           });
 
@@ -169,11 +218,14 @@ const App = () => {
             name: strKey,
             value: strKey,
           };
-        } else {
+        } else if (keyIdx === 0) {
           // SELECT BOX 기본 값 설정
           SelectData[keyIdx] = { name: "언어를 선택하세요.", value: "" };
         }
       });
+
+      // 현재 업로드 된 파일의 이름 저장
+      setUploadFileName(filesName);
 
       if (!_.isEmpty(errorMsg)) {
         setJsonData({ deletes, errorMsg });
@@ -181,7 +233,6 @@ const App = () => {
         setSelectData(SelectData);
         setPreString(preLanguage);
         setStrString(strLanguage);
-        setUploadFileName(filesName);
 
         setJsonData({ deletes, errorMsg });
       }
@@ -194,11 +245,12 @@ const App = () => {
     const { value } = e.target;
     let fileName = "";
 
+    // 현재 선택한 선택 박스의 Value 값 switching
     switch (value) {
       case "Korean":
         fileName = "kr.js";
         break;
-      case "English":
+      case "English(US)":
         fileName = "en.js";
         break;
       case "Chinese":
@@ -213,7 +265,7 @@ const App = () => {
       case "Japanese":
         fileName = "jp.js";
         break;
-      case "Portuguese":
+      case "Portuguese(Brazilian)":
         fileName = "pt.js";
         break;
       case "Spanish":
@@ -223,8 +275,10 @@ const App = () => {
         break;
     }
 
+    // utf-8 설정
     let JsonUrl = "data:application/json;charset=utf-8,";
 
+    // 다운로드 받을 JS 파일 입력 및 그리기 / 설정
     const settingJS =
       string +
       preString[value] +
@@ -237,6 +291,20 @@ const App = () => {
     setJsonUrl((JsonUrl += encodeURIComponent(settingJS)));
   };
 
+  // 모드 변경할 때마다 초기화 작업
+  useEffect(() => {
+    setJsonData({
+      deletes: {},
+      errorMsg: {},
+    });
+
+    setSelectData([{ name: "언어를 선택하세요.", value: "" }]);
+    setFileName("");
+    setJsonUrl("");
+
+    inputRef.current.value = "";
+  }, [mode, setMode]);
+
   return (
     <ConverterContainer>
       <ConvertMainWrapper>
@@ -244,6 +312,18 @@ const App = () => {
           <ConverterTitle onClick={onSelect}>LG Converter</ConverterTitle>
         </ConverterTitleWrap>
         <ConverterWrapper>
+          <LanguageMenu>
+            <LanguageRequired>*</LanguageRequired>
+            <LanguageTarget>모드</LanguageTarget>
+            <UploadModeWrap>
+              <UploadModeButton onClick={() => onMode(true)} active={mode}>
+                Develop
+              </UploadModeButton>
+              <UploadModeButton onClick={() => onMode(false)} active={!mode}>
+                Release
+              </UploadModeButton>
+            </UploadModeWrap>
+          </LanguageMenu>
           <LanguageMenu>
             <LanguageRequired>*</LanguageRequired>
             <LanguageTarget>엑셀</LanguageTarget>
