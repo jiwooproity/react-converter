@@ -1,4 +1,4 @@
 export let message = `
-const messages = defineMessages({
-  ...common,
+\nconst messages = defineMessages({
+    ...common,
 `;

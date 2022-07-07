@@ -184,3 +184,7 @@ export const UploadFileInputButton = styled.button`
 
   transition: background-color 0.5s ease;
 `;
+
+export const UploadModeWrap = styled.div`
+  width: 380px;
+`;
