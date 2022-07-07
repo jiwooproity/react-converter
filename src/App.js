@@ -196,6 +196,22 @@ const App = () => {
               };
             }
 
+            if (
+              strStr &&
+              strStr.split(" ").length &&
+              strStr.split(" ").length > 1
+            ) {
+              ErrorMessage = {
+                ...ErrorMessage,
+                "STR_ID_SPACE.ERROR": {
+                  ...ErrorMessage["STR_ID_SPACE.ERROR"],
+                  [`Str_ID ${[
+                    strIdx + 2,
+                  ]}번 행`]: `해당 키 값에 띄어쓰기가 존재합니다.`,
+                },
+              };
+            }
+
             // STR_ID가 존재하지 않을 경우
             if (strStr === undefined) {
               ErrorMessage = {
