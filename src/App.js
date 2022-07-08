@@ -7,6 +7,7 @@ import ReactJson from "react-json-view";
 import SelectBox from "./SelectBox";
 
 import { string, message } from "./defaultLocale";
+import { language } from "./data/language";
 
 // CSS 스타일
 import {
@@ -28,7 +29,6 @@ import {
   UploadModeWrap,
   UploadModeButton,
 } from "./style/Styled";
-import { language } from "./data/language";
 
 const setKey = [
   "Korean",
