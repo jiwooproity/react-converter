@@ -181,8 +181,8 @@ const App = () => {
 
             if (
               JSON[2][targetIdx][target] &&
-              JSON[2][targetIdx][target].split("\n").length &&
-              JSON[2][targetIdx][target].split("\n").length > 1
+              JSON[2][targetIdx][target].toString().split("\n").length &&
+              JSON[2][targetIdx][target].toString().split("\n").length > 1
             ) {
               sendMessage(1, msg_01, msg_02);
             }
@@ -317,7 +317,7 @@ const App = () => {
         fileName = "de.js";
         break;
       case "Japanese":
-        fileName = "jp.js";
+        fileName = "ja.js";
         break;
       case "Portuguese(Brazilian)":
         fileName = "pt.js";
