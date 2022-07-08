@@ -30,24 +30,18 @@ import {
 } from "./style/Styled";
 
 const App = () => {
-  // 1번 시트 value 값
-  const [preString, setPreString] = useState("");
-  // 2번 시트 defineMessage 영역 값
-  const [strString, setStrString] = useState("");
+  const inputRef = useRef(null);
 
-  // 다운로드 될 파일의 이름 설정 EX) kr.js .. en.js 등
-  const [fileName, setFileName] = useState("");
-  // 다운로드 요청을 받을 URL 설정
-  const [jsonUrl, setJsonUrl] = useState("");
+  const [preString, setPreString] = useState(""); // 1번 시트 value 값
+  const [strString, setStrString] = useState(""); // 2번 시트 defineMessage 영역 값
+  const [fileName, setFileName] = useState(""); // 다운로드 될 파일의 이름 설정 EX) kr.js .. en.js 등
+  const [jsonUrl, setJsonUrl] = useState(""); // 다운로드 요청을 받을 URL 설정
+  const [mode, setMode] = useState(true); // Develop / Release 모드 설정
 
-  // Develop / Release 모드 설정
-  const [mode, setMode] = useState(true);
-
-  // 아래 JSON 프리 뷰에 띄어 줄 데이터 목록 설정
   const [jsonData, setJsonData] = useState({
     Deleted: {},
     ErrorMessage: {},
-  });
+  }); // 아래 JSON 프리 뷰에 띄어 줄 데이터 목록 설정
 
   const [uploadFileName, setUploadFileName] = useState(
     "JSON으로 변환 할 엑셀 파일을 등록 해 주세요."
@@ -57,19 +51,21 @@ const App = () => {
     { name: "언어를 선택하세요.", value: "" },
   ]);
 
-  const inputRef = useRef(null);
-
   const onMode = (on) => {
     setMode(on);
   };
 
-  const onUpload = (e) => {
-    setJsonUrl("");
+  const onReset = () => {
     setSelectData([{ name: "언어를 선택하세요.", value: "" }]);
     setJsonData({
       Deleted: {},
       ErrorMessage: {},
     });
+    setJsonUrl("");
+  };
+
+  const onUpload = (e) => {
+    onReset();
 
     let JSON = [];
 
@@ -112,36 +108,26 @@ const App = () => {
       sheetKey.predefined = Object.keys(JSON[1][0]);
       sheetKey.string = Object.keys(JSON[2][0]);
 
-      // const value = {} 시트 2
-      let preLanguage = {
-        Korean: "",
-        "English(US)": "",
-        Chinese: "",
-        French: "",
-        German: "",
-        Japanese: "",
-        "Portuguese(Brazilian)": "",
-        Spanish: "",
+      const getKey = (index) => {
+        let json = {};
+        const keys = Object.keys(JSON[index][0]);
+
+        keys.forEach((key) => {
+          json = {
+            ...json,
+            [key]: "",
+          };
+        });
+
+        return json;
       };
 
-      // const message = defineMessages({}) 시트 3
-      let strLanguage = {
-        Korean: "",
-        "English(US)": "",
-        Chinese: "",
-        French: "",
-        German: "",
-        Japanese: "",
-        "Portuguese(Brazilian)": "",
-        Spanish: "",
-      };
+      let preLanguage = getKey(1); // const value = {} 시트 2
+      let strLanguage = getKey(2); // const message = defineMessages({}) 시트 3
 
-      // 선택 박스 데이터
-      let SelectData = [];
-      // 에러 발생 시 메세지
-      let ErrorMessage = {};
-      // 삭제 컬럼 활성화 된 데이터 저장
-      let Deleted = {};
+      let SelectData = []; // 선택 박스 데이터
+      let ErrorMessage = {}; // 에러 발생 시 메세지
+      let Deleted = {}; // 삭제 컬럼 활성화 된 데이터 저장
 
       // const value = {} 안에 입력 될 데이터 설정 ( 문자열로 가공 )
       _.forEach(sheetKey.predefined, (preKey, keyIdx) => {
@@ -159,75 +145,87 @@ const App = () => {
 
       // const message = defineMessages({}) 안에 입력 될 데이터 설정 ( 문자열로 가공 )
       _.forEach(sheetKey.string, (strKey, keyIdx) => {
-        const chkColumn = ["Comments", "신규", "수정", "삭제", "사용처"];
+        const columnArr = ["Comments", "신규", "수정", "삭제", "사용처"];
+        const errorArr = [
+          "DUPLICATE.ERROR",
+          "SPACE_BAR.ERROR",
+          "STR_ID_SPACE.ERROR",
+          "STR_ID.ERROR",
+        ];
 
-        if (keyIdx !== 0 && !chkColumn.includes(strKey)) {
+        if (keyIdx !== 0 && !columnArr.includes(strKey)) {
           let test = [];
+
+          const sendMessage = (errNumber, msgKey, msg) => {
+            ErrorMessage = {
+              ...ErrorMessage,
+              [errorArr[errNumber]]: {
+                ...ErrorMessage[errorArr[errNumber]],
+                [msgKey]: msg,
+              },
+            };
+          };
+
+          const dupliCheck = (data, target, targetIdx) => {
+            const msg_01 = `Str_ID ${[targetIdx + 2]}번 행`;
+            const msg_02 = `${target} 중복 키가 존재합니다.`;
+
+            if (data.includes(target)) {
+              sendMessage(0, msg_01, msg_02);
+            }
+          };
+
+          const spaceCheck = (target, targetIdx) => {
+            const msg_01 = `${target} ${[targetIdx + 2]}번 행`;
+            const msg_02 = `해당 값에 줄바꿈이 존재합니다.`;
+
+            if (
+              JSON[2][targetIdx][target] &&
+              JSON[2][targetIdx][target].split("\n").length &&
+              JSON[2][targetIdx][target].split("\n").length > 1
+            ) {
+              sendMessage(1, msg_01, msg_02);
+            }
+          };
+
+          const strSpaceCheck = (target, targetIdx) => {
+            const msg_01 = `Str_ID ${[targetIdx + 2]}번 행`;
+            const msg_02 = `해당 키 값에 띄어쓰기가 존재합니다.`;
+
+            if (
+              target &&
+              target.split(" ").length &&
+              target.split(" ").length > 1
+            ) {
+              sendMessage(2, msg_01, msg_02);
+            }
+          };
+
+          const strIdCheck = (target, targetIdx) => {
+            const msg_01 = `Str_ID ${[targetIdx + 2]}번 행`;
+            const msg_02 = "STR_ID 키 값이 입력되지 않았습니다.";
+
+            if (target === undefined) {
+              sendMessage(3, msg_01, msg_02);
+            }
+          };
+
+          const isDeleteData = (targetIdx) => {
+            return JSON[2][targetIdx]["삭제"] !== undefined;
+          };
 
           _.forEach(sheetStr.string, (strStr, strIdx) => {
             // ----------------------- 오류 체크 -----------------------
-            // 중복 키 체크
-            if (test.includes(strStr)) {
-              ErrorMessage = {
-                ...ErrorMessage,
-                "DUPLICATE.ERROR": {
-                  ...ErrorMessage["DUPLICATE.ERROR"],
-                  [`Str_ID ${[
-                    strIdx + 2,
-                  ]}번 행`]: `${strStr} 중복 키가 존재합니다.`,
-                },
-              };
-            }
 
-            // 줄바꿈 제거 필요 알림
-            if (
-              JSON[2][strIdx][strKey] &&
-              JSON[2][strIdx][strKey].split("\n").length &&
-              JSON[2][strIdx][strKey].split("\n").length > 1
-            ) {
-              ErrorMessage = {
-                ...ErrorMessage,
-                "SPACE_BAR.ERROR": {
-                  ...ErrorMessage["SPACE_BAR.ERROR"],
-                  [`${strKey} ${[
-                    strIdx + 2,
-                  ]}번 행`]: `해당 값에 줄바꿈이 존재합니다.`,
-                },
-              };
-            }
+            dupliCheck(test, strStr, strIdx); // 중복 키 체크 / DUPLICATE.ERROR
+            spaceCheck(strKey, strIdx); // 줄바꿈 제거 필요 알림 / SPACE_BAR.ERROR
+            strSpaceCheck(strStr, strIdx); // 키 값 공백 체크 / STR_ID_SPACE.ERROR
+            strIdCheck(strStr, strIdx); // STR_ID가 존재하지 않을 경우 / STR_ID.ERROR
 
-            if (
-              strStr &&
-              strStr.split(" ").length &&
-              strStr.split(" ").length > 1
-            ) {
-              ErrorMessage = {
-                ...ErrorMessage,
-                "STR_ID_SPACE.ERROR": {
-                  ...ErrorMessage["STR_ID_SPACE.ERROR"],
-                  [`Str_ID ${[
-                    strIdx + 2,
-                  ]}번 행`]: `해당 키 값에 띄어쓰기가 존재합니다.`,
-                },
-              };
-            }
-
-            // STR_ID가 존재하지 않을 경우
-            if (strStr === undefined) {
-              ErrorMessage = {
-                ...ErrorMessage,
-                "STR_ID.ERROR": {
-                  ...ErrorMessage["STR_ID.ERROR"],
-                  [`Str_ID ${[
-                    strIdx + 2,
-                  ]}번 행`]: `STR_ID 키 값이 입력되지 않았습니다.`,
-                },
-              };
-            }
             // ----------------------- 오류 체크 -----------------------
 
             // 삭제 컬럼 체크
-            if (JSON[2][strIdx]["삭제"] !== undefined) {
+            if (isDeleteData(strIdx)) {
               Deleted = {
                 ...Deleted,
                 [strStr]: `${strIdx + 2}번 행이 삭제되었습니다.`,
@@ -304,7 +302,7 @@ const App = () => {
     // 현재 선택한 선택 박스의 Value 값 switching
     switch (value) {
       case "Korean":
-        fileName = "kr.js";
+        fileName = "ko.js";
         break;
       case "English(US)":
         fileName = "en.js";
