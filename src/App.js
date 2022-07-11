@@ -2,12 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import _ from "lodash";
 
 import * as XLSX from "xlsx";
+import JSZip from "jszip";
+import FileSaver from "file-saver";
 import ReactJson from "react-json-view";
 
 import SelectBox from "./SelectBox";
 
 import { string, message } from "./defaultLocale";
 import { language } from "./data/language";
+import { CHECK } from "./func/check";
 
 // CSS 스타일
 import {
@@ -30,9 +33,6 @@ import {
   UploadModeButton,
   AllDownloadButton,
 } from "./style/Styled";
-import { CHECK } from "./func/check";
-import JSZip from "jszip";
-import FileSaver from "file-saver";
 
 const setKey = [
   "Korean",
