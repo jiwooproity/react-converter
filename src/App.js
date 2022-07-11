@@ -29,6 +29,7 @@ import {
   UploadModeWrap,
   UploadModeButton,
 } from "./style/Styled";
+import { CHECK } from "./func/check";
 
 const setKey = [
   "Korean",
@@ -170,7 +171,7 @@ const App = () => {
 
       _.forEach(sheetKey.string, (strKey, keyIdx) => {
         if (keyNumber > 0 && setKey.includes(strKey)) {
-          let test = [];
+          let strArr = [];
 
           const sendMessage = (errNumber, msgKey, msg) => {
             ErrorMessage = {
@@ -182,97 +183,13 @@ const App = () => {
             };
           };
 
-          // 삭제 컬럼 검사
-          const isDeleteData = (targetIdx) => {
-            return SheetName_string[targetIdx]["삭제"] !== undefined;
-          };
-
-          // 중복 검사
-          const dupliCheck = (data, target, targetIdx) => {
-            const msg_01 = `Str_ID ${[targetIdx + 2]}번 행`;
-            const msg_02 = `${target} 중복 키가 존재합니다.`;
-
-            if (
-              data.includes(target) &&
-              SheetName_string[targetIdx]["삭제"] === undefined
-            ) {
-              const prevDupIndex = data.indexOf(target);
-
-              if (SheetName_string[prevDupIndex]["삭제"] === undefined) {
-                sendMessage(0, msg_01, msg_02);
-              }
-            }
-          };
-
-          // 줄바꿈 검사
-          const spaceCheck = (target, targetIdx) => {
-            const data = SheetName_string[targetIdx][target];
-            const msg_01 = `${target} ${[targetIdx + 2]}번 행`;
-            const msg_02 = `해당 값에 줄바꿈이 존재합니다.`;
-
-            if (
-              data &&
-              data.toString().split("\n").length &&
-              data.toString().split("\n").length > 1
-            ) {
-              sendMessage(1, msg_01, msg_02);
-            }
-          };
-
-          // 키 값 띄어쓰기 검사
-          const strSpaceCheck = (target, targetIdx) => {
-            const msg_01 = `Str_ID ${[targetIdx + 2]}번 행`;
-            const msg_02 = `해당 키 값에 띄어쓰기가 존재합니다.`;
-
-            if (
-              target &&
-              target.split(" ").length &&
-              target.split(" ").length > 1
-            ) {
-              sendMessage(2, msg_01, msg_02);
-            }
-          };
-
-          // 키 값 입력 검사
-          const strIdCheck = (target, targetIdx) => {
-            const msg_01 = `Str_ID ${[targetIdx + 2]}번 행`;
-            const msg_02 = "STR_ID 키 값이 입력되지 않았습니다.";
-
-            if (target === undefined) {
-              sendMessage(3, msg_01, msg_02);
-            }
-          };
-
-          const noneData = (target, targetKey, targetIdx) => {
-            const msg_01 = `${targetKey} ${[targetIdx + 2]}번 행`;
-            const msg_02 = `${target} 값이 없습니다.`;
-
-            // Develop / Release 모드 유무
-            if (!mode) {
-              sendMessage(5, msg_01, msg_02);
-            }
-          };
-
-          // const isInsertData = (target, targetIdx) => {
-          //   const data = SheetName_string[targetIdx][target];
-          //   const msg_01 = `${target} ${[targetIdx + 2]}번 행`;
-          //   const msg_02 = "{} 중괄호 입력 시, 큰 따옴표를 제거 해주세요.";
-
-          //   if (data !== undefined && data.toString().includes(`"{`)) {
-          //     sendMessage(4, msg_01, msg_02);
-          //   }
-          // };
-
           _.forEach(sheetStr.string, (strStr, strIdx) => {
-            // ----------------------- 오류 체크 -----------------------
-
-            dupliCheck(test, strStr, strIdx); // 중복 키 체크 / DUPLICATE.ERROR
-            spaceCheck(strKey, strIdx); // 줄바꿈 제거 필요 알림 / SPACE_BAR.ERROR
-            strSpaceCheck(strStr, strIdx); // 키 값 공백 체크 / STR_ID_SPACE.ERROR
-            strIdCheck(strKey, strIdx); // STR_ID가 존재하지 않을 경우 / STR_ID.ERROR
-            // isInsertData(strKey, strIdx); // 중괄호 입력 검사 / BRACE.ERROR
-
-            // ----------------------- 오류 체크 -----------------------
+            const sheet = SheetName_string;
+            CHECK.dupliCheck(strArr, strStr, strIdx, sheet, sendMessage); // 중복 키 체크 / DUPLICATE.ERROR
+            CHECK.spaceCheck(strKey, strIdx, sheet, sendMessage); // 줄바꿈 제거 필요 알림 / SPACE_BAR.ERROR
+            CHECK.strSpaceCheck(strStr, strIdx, sendMessage); // 키 값 공백 체크 / STR_ID_SPACE.ERROR
+            CHECK.strIdCheck(strKey, strIdx, sendMessage); // STR_ID가 존재하지 않을 경우 / STR_ID.ERROR
+            // CHECK.isInsertData(strKey, strIdx); // 중괄호 입력 검사 / BRACE.ERROR
 
             // JSON 생성
             const setLanguageData = (key, idx) => {
@@ -284,7 +201,7 @@ const App = () => {
             };
 
             // 삭제 컬럼 체크
-            if (isDeleteData(strIdx)) {
+            if (CHECK.isDeleteData(strIdx, sheet)) {
               Deleted = {
                 ...Deleted,
                 [strStr]: `${strIdx + 2}번 행이 삭제되었습니다.`,
@@ -294,12 +211,12 @@ const App = () => {
               if (SheetName_string[strIdx][strKey] !== undefined) {
                 setLanguageData(strKey, strIdx);
               } else {
-                noneData(strStr, strKey, strIdx);
+                CHECK.noneData(strStr, strKey, strIdx, sendMessage, mode);
               }
             }
 
             // 키 값 중복 체크를 위해 배열에 저장
-            test[strIdx] = strStr;
+            strArr[strIdx] = strStr;
           });
 
           // SELECT BOX 할당
@@ -312,6 +229,7 @@ const App = () => {
         } else if (keyNumber === 0) {
           // SELECT BOX 기본 값 설정
           SelectData[keyIdx] = { name: "언어를 선택하세요.", value: "" };
+
           keyNumber++;
         }
       });
@@ -325,7 +243,6 @@ const App = () => {
         setSelectData(SelectData);
         setPreString(preLanguage);
         setStrString(strLanguage);
-
         setJsonData({ Deleted, ErrorMessage });
       }
     };
