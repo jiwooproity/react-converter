@@ -28,8 +28,11 @@ import {
   DownloadButton,
   UploadModeWrap,
   UploadModeButton,
+  AllDownloadButton,
 } from "./style/Styled";
 import { CHECK } from "./func/check";
+import JSZip from "jszip";
+import FileSaver from "file-saver";
 
 const setKey = [
   "Korean",
@@ -84,6 +87,8 @@ const App = () => {
       ErrorMessage: {},
     });
     setJsonUrl("");
+    setPreString("");
+    setStrString("");
   };
 
   const onUpload = (e) => {
@@ -250,15 +255,8 @@ const App = () => {
     reader.readAsBinaryString(files);
   };
 
-  const onSelect = (e) => {
-    const { value } = e.target;
-    let fileName = value !== "" ? language[value] : "";
-
-    // utf-8 설정
-    let JsonUrl = "data:application/json;charset=utf-8,";
-
-    // 다운로드 받을 JS 파일 입력 및 그리기 / 설정
-    const settingJS =
+  const onSettingJs = (value) => {
+    const setJS =
       string +
       preString[value] +
       "};" +
@@ -266,8 +264,38 @@ const App = () => {
       strString[value] +
       "});\n\nexport default messages;";
 
+    return setJS;
+  };
+
+  const onCreateZip = () => {
+    const zip = new JSZip();
+
+    zip.folder("Locale").file("ko.js", onSettingJs("Korean"));
+    zip.folder("Locale").file("en.js", onSettingJs("English(US)"));
+    zip.folder("Locale").file("zh.js", onSettingJs("Chinese"));
+    zip.folder("Locale").file("fr.js", onSettingJs("French"));
+    zip.folder("Locale").file("de.js", onSettingJs("German"));
+    zip.folder("Locale").file("ja.js", onSettingJs("Japanese"));
+    zip.folder("Locale").file("pt.js", onSettingJs("Portuguese(Brazilian)"));
+    zip.folder("Locale").file("es.js", onSettingJs("Spanish"));
+
+    zip.generateAsync({ type: "blob" }).then((resZip) => {
+      FileSaver(resZip, "Locale.zip");
+    });
+  };
+
+  const onSelect = (e) => {
+    const { value } = e.target;
+    let notError = value !== "";
+    let fileName = notError ? language[value] : "";
+
+    let JsonUrl = "data:application/json;charset=utf-8,"; // utf-8 설정
+    const settingJS = onSettingJs(value); // 다운로드 받을 JS 파일 입력 및 그리기 / 설정
+
+    const setURL = notError ? (JsonUrl += encodeURIComponent(settingJS)) : "";
+
     setFileName(fileName);
-    setJsonUrl((JsonUrl += encodeURIComponent(settingJS)));
+    setJsonUrl(setURL);
   };
 
   // 모드 변경할 때마다 초기화 작업
@@ -281,6 +309,8 @@ const App = () => {
     setSelectData([{ name: "언어를 선택하세요.", value: "" }]);
     setFileName("");
     setJsonUrl("");
+    setPreString("");
+    setStrString("");
 
     inputRef.current.value = "";
   }, [mode, setMode]);
@@ -341,8 +371,15 @@ const App = () => {
             id={`${fileName}`}
             download={`${fileName}`}
           >
-            JSON 다운로드
+            JS 다운로드
           </DownloadButton>
+          <AllDownloadButton
+            disabled={preString === "" && strString === ""}
+            active={jsonUrl === ""}
+            onClick={onCreateZip}
+          >
+            ZIP 다운로드
+          </AllDownloadButton>
         </ConverterBottomWrap>
       </ConvertMainWrapper>
     </ConverterContainer>
