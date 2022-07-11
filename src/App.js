@@ -270,6 +270,7 @@ const App = () => {
   const onCreateZip = () => {
     const zip = new JSZip();
 
+    // Locale 폴더 안에 넣은 파일 이름과 파일 안에 입력 할 데이터를 넣어준다.
     zip.folder("Locale").file("ko.js", onSettingJs("Korean"));
     zip.folder("Locale").file("en.js", onSettingJs("English(US)"));
     zip.folder("Locale").file("zh.js", onSettingJs("Chinese"));
@@ -279,6 +280,7 @@ const App = () => {
     zip.folder("Locale").file("pt.js", onSettingJs("Portuguese(Brazilian)"));
     zip.folder("Locale").file("es.js", onSettingJs("Spanish"));
 
+    // 모두 작성이 완료되면, zip.generateAsync로 FileSaver를 활용해서 zip파일로 내보낸다.
     zip.generateAsync({ type: "blob" }).then((resZip) => {
       FileSaver(resZip, "Locale.zip");
     });
@@ -286,6 +288,7 @@ const App = () => {
 
   const onSelect = (e) => {
     const { value } = e.target;
+
     let notError = value !== "";
     let fileName = notError ? language[value] : "";
 
