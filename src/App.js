@@ -190,6 +190,11 @@ const App = () => {
 
           _.forEach(sheetStr.string, (strStr, strIdx) => {
             const sheet = SheetName_string;
+
+            // strKey: 최상위 데이터 (언어) EX) Korean, English ... 등
+            // strStr: 각 언어에 배치 된 다국어 ID EX) user_name, restart_device ... 등
+            // strLanguage["Korean"] => Korean: { user_name: "유저 닉네임", restart_device: "디바이스 재시작" } / 각 언어 오브젝트 데이터
+
             CHECK.dupliCheck(strArr, strStr, strIdx, sheet, sendMessage); // 중복 키 체크 / DUPLICATE.ERROR
             CHECK.spaceCheck(strKey, strIdx, sheet, sendMessage); // 줄바꿈 제거 필요 알림 / SPACE_BAR.ERROR
             CHECK.strSpaceCheck(strStr, strIdx, sendMessage); // 키 값 공백 체크 / STR_ID_SPACE.ERROR
@@ -271,14 +276,9 @@ const App = () => {
     const zip = new JSZip();
 
     // Locale 폴더 안에 넣은 파일 이름과 파일 안에 입력 할 데이터를 넣어준다.
-    zip.folder("Locale").file("ko.js", onSettingJs("Korean"));
-    zip.folder("Locale").file("en.js", onSettingJs("English(US)"));
-    zip.folder("Locale").file("zh.js", onSettingJs("Chinese"));
-    zip.folder("Locale").file("fr.js", onSettingJs("French"));
-    zip.folder("Locale").file("de.js", onSettingJs("German"));
-    zip.folder("Locale").file("ja.js", onSettingJs("Japanese"));
-    zip.folder("Locale").file("pt.js", onSettingJs("Portuguese(Brazilian)"));
-    zip.folder("Locale").file("es.js", onSettingJs("Spanish"));
+    _.forEach(setKey, (key) => {
+      zip.folder("Locale").file(language[key], onSettingJs(key));
+    });
 
     // 모두 작성이 완료되면, zip.generateAsync로 FileSaver를 활용해서 zip파일로 내보낸다.
     zip.generateAsync({ type: "blob" }).then((resZip) => {
