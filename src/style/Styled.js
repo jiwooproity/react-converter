@@ -45,6 +45,7 @@ export const ConverterBottomWrap = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: black;
 `;
 
 export const ConverterTitle = styled.h1`
@@ -78,7 +79,7 @@ export const LanguageTarget = styled.span`
 `;
 
 export const DownloadButton = styled.a`
-  width: 100%;
+  width: ${({ disabled }) => (disabled ? "0%" : "50%")};
   height: ${({ disabled }) => (disabled ? "0px" : "40px")};
 
   line-height: 40px;
@@ -101,7 +102,35 @@ export const DownloadButton = styled.a`
     color: white;
   }
 
-  transition: background-color 0.5s ease, color 0.5s ease, height 0.5s ease;
+  transition: background-color 0.5s ease, color 0.5s ease;
+`;
+
+export const AllDownloadButton = styled.a`
+  width: ${({ active }) => (active ? "100%" : "50%")};
+  height: ${({ disabled }) => (disabled ? "0px" : "40px")};
+
+  line-height: 40px;
+
+  text-align: center;
+  font-size: 12px;
+
+  text-decoration: none;
+
+  color: white;
+
+  cursor: pointer;
+
+  background-color: rgba(0, 0, 0, 0.8);
+
+  pointer-events: ${({ disabled }) => (disabled ? "none" : "")};
+
+  &:hover {
+    background-color: #a50034;
+    color: white;
+  }
+
+  transition: background-color 0.5s ease, color 0.5s ease, width 0.5s ease,
+    height 0.5s ease;
 `;
 
 export const JsonView = styled.div`

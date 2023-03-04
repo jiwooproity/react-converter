@@ -2,11 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import _ from "lodash";
 
 import * as XLSX from "xlsx";
+import JSZip from "jszip";
+import FileSaver from "file-saver";
 import ReactJson from "react-json-view";
 
 import SelectBox from "./SelectBox";
 
 import { string, message } from "./defaultLocale";
+import { language } from "./data/language";
+import { CHECK } from "./func/check";
 
 // CSS 스타일
 import {
@@ -27,27 +31,42 @@ import {
   DownloadButton,
   UploadModeWrap,
   UploadModeButton,
+  AllDownloadButton,
 } from "./style/Styled";
 
+const setKey = [
+  "Korean",
+  "English(US)",
+  "Chinese",
+  "French",
+  "German",
+  "Japanese",
+  "Portuguese(Brazilian)",
+  "Spanish",
+];
+
+const errorArr = [
+  "DUPLICATE.ERROR",
+  "SPACE_BAR.ERROR",
+  "STR_ID_SPACE.ERROR",
+  "STR_ID.ERROR",
+  "BRACE.ERROR",
+  "NONE.ERROR",
+];
+
 const App = () => {
-  // 1번 시트 value 값
-  const [preString, setPreString] = useState("");
-  // 2번 시트 defineMessage 영역 값
-  const [strString, setStrString] = useState("");
+  const inputRef = useRef(null);
 
-  // 다운로드 될 파일의 이름 설정 EX) kr.js .. en.js 등
-  const [fileName, setFileName] = useState("");
-  // 다운로드 요청을 받을 URL 설정
-  const [jsonUrl, setJsonUrl] = useState("");
+  const [preString, setPreString] = useState(""); // 1번 시트 value 값
+  const [strString, setStrString] = useState(""); // 2번 시트 defineMessage 영역 값
+  const [fileName, setFileName] = useState(""); // 다운로드 될 파일의 이름 설정 EX) kr.js .. en.js 등
+  const [jsonUrl, setJsonUrl] = useState(""); // 다운로드 요청을 받을 URL 설정
+  const [mode, setMode] = useState(true); // Develop / Release 모드 설정
 
-  // Develop / Release 모드 설정
-  const [mode, setMode] = useState(true);
-
-  // 아래 JSON 프리 뷰에 띄어 줄 데이터 목록 설정
   const [jsonData, setJsonData] = useState({
     Deleted: {},
     ErrorMessage: {},
-  });
+  }); // 아래 JSON 프리 뷰에 띄어 줄 데이터 목록 설정
 
   const [uploadFileName, setUploadFileName] = useState(
     "JSON으로 변환 할 엑셀 파일을 등록 해 주세요."
@@ -57,19 +76,23 @@ const App = () => {
     { name: "언어를 선택하세요.", value: "" },
   ]);
 
-  const inputRef = useRef(null);
-
   const onMode = (on) => {
     setMode(on);
   };
 
-  const onUpload = (e) => {
-    setJsonUrl("");
+  const onReset = () => {
     setSelectData([{ name: "언어를 선택하세요.", value: "" }]);
     setJsonData({
       Deleted: {},
       ErrorMessage: {},
     });
+    setJsonUrl("");
+    setPreString("");
+    setStrString("");
+  };
+
+  const onUpload = (e) => {
+    onReset();
 
     let JSON = [];
 
@@ -98,50 +121,42 @@ const App = () => {
         JSON[index] = XLSX.utils.sheet_to_json(workBook.Sheets[sheetName]);
       });
 
+      const SheetName_predefined = JSON[1];
+      const SheetName_string = JSON[2];
+
       // 두번째 시트 VALUE 키 값 저장
-      _.forEach(JSON[1], (json, index) => {
+      _.forEach(SheetName_predefined, (json, index) => {
         sheetStr.predefined[index] = json.value;
       });
 
       // 세번째 시트 STR_ID 키 값 저장
-      _.forEach(JSON[2], (json, index) => {
+      _.forEach(SheetName_string, (json, index) => {
         sheetStr.string[index] = json.Str_ID;
       });
 
       // 각 시트에 존재하는 컬럼 데이터 저장 EX) ["STR_ID", "Korean", "English"]
       sheetKey.predefined = Object.keys(JSON[1][0]);
-      sheetKey.string = Object.keys(JSON[2][0]);
+      sheetKey.string = Object.keys(SheetName_string[0]);
 
-      // const value = {} 시트 2
-      let preLanguage = {
-        Korean: "",
-        "English(US)": "",
-        Chinese: "",
-        French: "",
-        German: "",
-        Japanese: "",
-        "Portuguese(Brazilian)": "",
-        Spanish: "",
+      const getKey = () => {
+        let data = {};
+
+        setKey.forEach((key) => {
+          data = {
+            ...data,
+            [key]: "",
+          };
+        });
+
+        return data;
       };
 
-      // const message = defineMessages({}) 시트 3
-      let strLanguage = {
-        Korean: "",
-        "English(US)": "",
-        Chinese: "",
-        French: "",
-        German: "",
-        Japanese: "",
-        "Portuguese(Brazilian)": "",
-        Spanish: "",
-      };
+      let preLanguage = getKey(); // const value = {} 시트 2
+      let strLanguage = getKey(); // const message = defineMessages({}) 시트 3
 
-      // 선택 박스 데이터
-      let SelectData = [];
-      // 에러 발생 시 메세지
-      let ErrorMessage = {};
-      // 삭제 컬럼 활성화 된 데이터 저장
-      let Deleted = {};
+      let SelectData = []; // 선택 박스 데이터
+      let ErrorMessage = {}; // 에러 발생 시 메세지
+      let Deleted = {}; // 삭제 컬럼 활성화 된 데이터 저장
 
       // const value = {} 안에 입력 될 데이터 설정 ( 문자열로 가공 )
       _.forEach(sheetKey.predefined, (preKey, keyIdx) => {
@@ -157,126 +172,75 @@ const App = () => {
         }
       });
 
-      // const message = defineMessages({}) 안에 입력 될 데이터 설정 ( 문자열로 가공 )
-      _.forEach(sheetKey.string, (strKey, keyIdx) => {
-        const chkColumn = ["Comments", "신규", "수정", "삭제", "사용처"];
+      let keyNumber = 0;
 
-        if (keyIdx !== 0 && !chkColumn.includes(strKey)) {
-          let test = [];
+      _.forEach(sheetKey.string, (strKey, keyIdx) => {
+        if (keyNumber > 0 && setKey.includes(strKey)) {
+          let strArr = [];
+
+          const sendMessage = (errNumber, msgKey, msg) => {
+            ErrorMessage = {
+              ...ErrorMessage,
+              [errorArr[errNumber]]: {
+                ...ErrorMessage[errorArr[errNumber]],
+                [msgKey]: msg,
+              },
+            };
+          };
 
           _.forEach(sheetStr.string, (strStr, strIdx) => {
-            // ----------------------- 오류 체크 -----------------------
-            // 중복 키 체크
-            if (test.includes(strStr)) {
-              ErrorMessage = {
-                ...ErrorMessage,
-                "DUPLICATE.ERROR": {
-                  ...ErrorMessage["DUPLICATE.ERROR"],
-                  [`Str_ID ${[
-                    strIdx + 2,
-                  ]}번 행`]: `${strStr} 중복 키가 존재합니다.`,
-                },
-              };
-            }
+            const sheet = SheetName_string;
 
-            // 줄바꿈 제거 필요 알림
-            if (
-              JSON[2][strIdx][strKey] &&
-              JSON[2][strIdx][strKey].split("\n").length &&
-              JSON[2][strIdx][strKey].split("\n").length > 1
-            ) {
-              ErrorMessage = {
-                ...ErrorMessage,
-                "SPACE_BAR.ERROR": {
-                  ...ErrorMessage["SPACE_BAR.ERROR"],
-                  [`${strKey} ${[
-                    strIdx + 2,
-                  ]}번 행`]: `해당 값에 줄바꿈이 존재합니다.`,
-                },
-              };
-            }
+            // strKey: 최상위 데이터 (언어) EX) Korean, English ... 등
+            // strStr: 각 언어에 배치 된 다국어 ID EX) user_name, restart_device ... 등
+            // strLanguage["Korean"] => Korean: { user_name: "유저 닉네임", restart_device: "디바이스 재시작" } / 각 언어 오브젝트 데이터
 
-            if (
-              strStr &&
-              strStr.split(" ").length &&
-              strStr.split(" ").length > 1
-            ) {
-              ErrorMessage = {
-                ...ErrorMessage,
-                "STR_ID_SPACE.ERROR": {
-                  ...ErrorMessage["STR_ID_SPACE.ERROR"],
-                  [`Str_ID ${[
-                    strIdx + 2,
-                  ]}번 행`]: `해당 키 값에 띄어쓰기가 존재합니다.`,
-                },
-              };
-            }
+            CHECK.dupliCheck(strArr, strStr, strIdx, sheet, sendMessage); // 중복 키 체크 / DUPLICATE.ERROR
+            CHECK.spaceCheck(strKey, strIdx, sheet, sendMessage); // 줄바꿈 제거 필요 알림 / SPACE_BAR.ERROR
+            CHECK.strSpaceCheck(strStr, strIdx, sendMessage); // 키 값 공백 체크 / STR_ID_SPACE.ERROR
+            CHECK.strIdCheck(strKey, strIdx, sendMessage); // STR_ID가 존재하지 않을 경우 / STR_ID.ERROR
+            // CHECK.isInsertData(strKey, strIdx); // 중괄호 입력 검사 / BRACE.ERROR
 
-            // STR_ID가 존재하지 않을 경우
-            if (strStr === undefined) {
-              ErrorMessage = {
-                ...ErrorMessage,
-                "STR_ID.ERROR": {
-                  ...ErrorMessage["STR_ID.ERROR"],
-                  [`Str_ID ${[
-                    strIdx + 2,
-                  ]}번 행`]: `STR_ID 키 값이 입력되지 않았습니다.`,
-                },
-              };
-            }
-            // ----------------------- 오류 체크 -----------------------
+            // JSON 생성
+            const setLanguageData = (key, idx) => {
+              strLanguage[key] += `\t${strStr} : ${
+                SheetName_string[idx][key].toString().indexOf("value.") >= 0
+                  ? SheetName_string[idx][key].toString()
+                  : '"' + SheetName_string[idx][key].toString() + '"'
+              } ,\n`;
+            };
 
             // 삭제 컬럼 체크
-            if (JSON[2][strIdx]["삭제"] !== undefined) {
+            if (CHECK.isDeleteData(strIdx, sheet)) {
               Deleted = {
                 ...Deleted,
                 [strStr]: `${strIdx + 2}번 행이 삭제되었습니다.`,
               };
             } else {
-              // Develop / Release 모드 유무
-              if (mode) {
-                // Develop 모드 일 경우, 값이 하나라도 존재하지 않더라도 해당 값은 제외시키고 JS 파일 생성
-                if (JSON[2][strIdx][strKey] !== undefined) {
-                  strLanguage[strKey] += `\t${strStr} : ${
-                    JSON[2][strIdx][strKey].toString().indexOf("value.") >= 0
-                      ? JSON[2][strIdx][strKey].toString()
-                      : '"' + JSON[2][strIdx][strKey].toString() + '"'
-                  } ,\n`;
-                }
+              // Develop 모드 일 경우, 값이 하나라도 존재하지 않더라도 해당 값은 제외시키고 JS 파일 생성
+              if (SheetName_string[strIdx][strKey] !== undefined) {
+                setLanguageData(strKey, strIdx);
               } else {
-                // Release 모드 일 경우, 값이 하나라도 존재하지 않으면 에러 메세지 출력 및 JS 생성 및 다운로드 차단
-                if (JSON[2][strIdx][strKey] !== undefined) {
-                  strLanguage[strKey] += `\t${strStr} : ${
-                    JSON[2][strIdx][strKey].toString().indexOf("value.") >= 0
-                      ? JSON[2][strIdx][strKey].toString()
-                      : '"' + JSON[2][strIdx][strKey].toString() + '"'
-                  } ,\n`;
-                } else {
-                  ErrorMessage = {
-                    ...ErrorMessage,
-                    "NONE.ERROR": {
-                      ...ErrorMessage["NONE.ERROR"],
-                      [`${strKey} ${[
-                        strIdx + 2,
-                      ]}번 행`]: `${strStr} 값이 없습니다.`,
-                    },
-                  };
-                }
+                CHECK.noneData(strStr, strKey, strIdx, sendMessage, mode);
               }
             }
 
             // 키 값 중복 체크를 위해 배열에 저장
-            test[strIdx] = strStr;
+            strArr[strIdx] = strStr;
           });
 
           // SELECT BOX 할당
-          SelectData[keyIdx] = {
+          SelectData[keyNumber] = {
             name: strKey,
             value: strKey,
           };
-        } else if (keyIdx === 0) {
+
+          keyNumber++;
+        } else if (keyNumber === 0) {
           // SELECT BOX 기본 값 설정
           SelectData[keyIdx] = { name: "언어를 선택하세요.", value: "" };
+
+          keyNumber++;
         }
       });
 
@@ -289,7 +253,6 @@ const App = () => {
         setSelectData(SelectData);
         setPreString(preLanguage);
         setStrString(strLanguage);
-
         setJsonData({ Deleted, ErrorMessage });
       }
     };
@@ -297,53 +260,8 @@ const App = () => {
     reader.readAsBinaryString(files);
   };
 
-  const onSelect = (e) => {
-    const { value } = e.target;
-    let fileName = "";
-
-    // 현재 선택한 선택 박스의 Value 값 switching
-    switch (value) {
-      case "Korean":
-        fileName = "kr.js";
-        break;
-      case "English(US)":
-        fileName = "en.js";
-        break;
-      case "Chinese":
-        fileName = "zh.js";
-        break;
-      case "French":
-        fileName = "fr.js";
-        break;
-      case "German":
-        fileName = "de.js";
-        break;
-      case "Japanese":
-        fileName = "jp.js";
-        break;
-      case "Portuguese(Brazilian)":
-        fileName = "pt.js";
-        break;
-      case "Spanish":
-        fileName = "es.js";
-        break;
-      case "":
-        fileName = "";
-        setJsonData({
-          Deleted: {},
-          ErrorMessage: {},
-        });
-        setJsonUrl("");
-        return;
-      default:
-        break;
-    }
-
-    // utf-8 설정
-    let JsonUrl = "data:application/json;charset=utf-8,";
-
-    // 다운로드 받을 JS 파일 입력 및 그리기 / 설정
-    const settingJS =
+  const onSettingJs = (value) => {
+    const setJS =
       string +
       preString[value] +
       "};" +
@@ -351,8 +269,36 @@ const App = () => {
       strString[value] +
       "});\n\nexport default messages;";
 
+    return setJS;
+  };
+
+  const onCreateZip = () => {
+    const zip = new JSZip();
+
+    // Locale 폴더 안에 넣은 파일 이름과 파일 안에 입력 할 데이터를 넣어준다.
+    _.forEach(setKey, (key) => {
+      zip.folder("Locale").file(language[key], onSettingJs(key));
+    });
+
+    // 모두 작성이 완료되면, zip.generateAsync로 FileSaver를 활용해서 zip파일로 내보낸다.
+    zip.generateAsync({ type: "blob" }).then((resZip) => {
+      FileSaver(resZip, "Locale.zip");
+    });
+  };
+
+  const onSelect = (e) => {
+    const { value } = e.target;
+
+    let notError = value !== "";
+    let fileName = notError ? language[value] : "";
+
+    let JsonUrl = "data:application/json;charset=utf-8,"; // utf-8 설정
+    const settingJS = onSettingJs(value); // 다운로드 받을 JS 파일 입력 및 그리기 / 설정
+
+    const setURL = notError ? (JsonUrl += encodeURIComponent(settingJS)) : "";
+
     setFileName(fileName);
-    setJsonUrl((JsonUrl += encodeURIComponent(settingJS)));
+    setJsonUrl(setURL);
   };
 
   // 모드 변경할 때마다 초기화 작업
@@ -366,6 +312,8 @@ const App = () => {
     setSelectData([{ name: "언어를 선택하세요.", value: "" }]);
     setFileName("");
     setJsonUrl("");
+    setPreString("");
+    setStrString("");
 
     inputRef.current.value = "";
   }, [mode, setMode]);
@@ -426,8 +374,15 @@ const App = () => {
             id={`${fileName}`}
             download={`${fileName}`}
           >
-            JSON 다운로드
+            JS 다운로드
           </DownloadButton>
+          <AllDownloadButton
+            disabled={preString === "" && strString === ""}
+            active={jsonUrl === ""}
+            onClick={onCreateZip}
+          >
+            ZIP 다운로드
+          </AllDownloadButton>
         </ConverterBottomWrap>
       </ConvertMainWrapper>
     </ConverterContainer>
