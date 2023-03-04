@@ -1,28 +1,87 @@
 {
-  "name": "lg_converter",
+  "name": "electron-converter",
+  "main": "./public/electron.js",
   "homepage": "./",
   "version": "0.1.0",
   "private": true,
+  "build": {
+    "productName": "React Converter",
+    "appId": "com.electron.hello",
+    "asar": true,
+    "protocols": {
+      "name": "React Converter",
+      "schemes": [
+        "React Converter"
+      ]
+    },
+    "mac": {
+      "target": [
+        "default"
+      ],
+      "icon": "./resources/installer/Icon.icns"
+    },
+    "dmg": {
+      "title": "React Converter",
+      "icon": "./resources/installer/Icon.icns"
+    },
+    "win": {
+      "target": [
+        "zip",
+        "nsis"
+      ],
+      "icon": "./resources/installer/Icon.ico"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm",
+        "zip",
+        "tar.gz"
+      ],
+      "icon": "./resources/linuxicon"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "directories": {
+      "buildResources": "resources/installer/",
+      "output": "dist/",
+      "app": "."
+    }
+  },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.3.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "axios": "^0.27.2",
+    "electron-is-dev": "^2.0.0",
     "file-saver": "^2.0.5",
-    "jszip": "^3.10.0",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
+    "jszip": "^3.10.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-json-view": "^1.21.3",
     "react-scripts": "5.0.1",
-    "styled-components": "^5.3.5",
+    "wait-on": "^7.0.1",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
   },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "cross-env": "^7.0.3",
+    "electron": "^23.1.2",
+    "electron-builder": "^23.6.0",
+    "electron-is-dev": "^2.0.0"
+  },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "electron .",
+    "build:osx": "build --mac",
+    "build:linux": "npm run build:linux32 && npm run build:linux64",
+    "build:linux32": "build --linux --ia32",
+    "build:linux64": "build --linux --x64",
+    "build:win": "npm run build:win32 && npm run build:win64",
+    "build:win32": "build --win --ia32",
+    "build:win64": "build --win --x64"
   },
   "eslintConfig": {
     "extends": [
