@@ -34,25 +34,9 @@ import {
   AllDownloadButton,
 } from "./style/Styled";
 
-const setKey = [
-  "Korean",
-  "English(US)",
-  "Chinese",
-  "French",
-  "German",
-  "Japanese",
-  "Portuguese(Brazilian)",
-  "Spanish",
-];
+const setKey = ["Korean", "English(US)", "Chinese", "French", "German", "Japanese", "Portuguese(Brazilian)", "Spanish"];
 
-const errorArr = [
-  "DUPLICATE.ERROR",
-  "SPACE_BAR.ERROR",
-  "STR_ID_SPACE.ERROR",
-  "STR_ID.ERROR",
-  "BRACE.ERROR",
-  "NONE.ERROR",
-];
+const errorArr = ["DUPLICATE.ERROR", "SPACE_BAR.ERROR", "STR_ID_SPACE.ERROR", "STR_ID.ERROR", "BRACE.ERROR", "NONE.ERROR"];
 
 const App = () => {
   const inputRef = useRef(null);
@@ -68,13 +52,9 @@ const App = () => {
     ErrorMessage: {},
   }); // 아래 JSON 프리 뷰에 띄어 줄 데이터 목록 설정
 
-  const [uploadFileName, setUploadFileName] = useState(
-    "JSON으로 변환 할 엑셀 파일을 등록 해 주세요."
-  );
+  const [uploadFileName, setUploadFileName] = useState("JSON으로 변환 할 엑셀 파일을 등록 해 주세요.");
 
-  const [selectData, setSelectData] = useState([
-    { name: "언어를 선택하세요.", value: "" },
-  ]);
+  const [selectData, setSelectData] = useState([{ name: "언어를 선택하세요.", value: "" }]);
 
   const onMode = (on) => {
     setMode(on);
@@ -164,9 +144,7 @@ const App = () => {
           _.forEach(sheetStr.predefined, (preStr, strIdx) => {
             // ... { ...Convert, * [Korean]: { ...Convert[key], [language]: "언어" } * }
             preLanguage[preKey] += `\t${preStr} : ${
-              JSON[1][strIdx][preKey].toString().indexOf("value.") >= 0
-                ? JSON[1][strIdx][preKey].toString()
-                : '"' + JSON[1][strIdx][preKey].toString() + '"'
+              JSON[1][strIdx][preKey].toString().indexOf("value.") >= 0 ? JSON[1][strIdx][preKey].toString() : '"' + JSON[1][strIdx][preKey].toString() + '"'
             } ,\n`;
           });
         }
@@ -261,13 +239,7 @@ const App = () => {
   };
 
   const onSettingJs = (value) => {
-    const setJS =
-      string +
-      preString[value] +
-      "};" +
-      message +
-      strString[value] +
-      "});\n\nexport default messages;";
+    const setJS = string + preString[value] + "};" + message + strString[value] + "});\n\nexport default messages;";
 
     return setJS;
   };
@@ -340,18 +312,10 @@ const App = () => {
           <LanguageMenu>
             <LanguageRequired>*</LanguageRequired>
             <LanguageTarget>엑셀</LanguageTarget>
-            <UploadFileInput
-              type={"file"}
-              id="excelInput"
-              onChange={onUpload}
-              ref={inputRef}
-              accept={".xls,.xlsx"}
-            />
+            <UploadFileInput type={"file"} id="excelInput" onChange={onUpload} ref={inputRef} accept={".xls,.xlsx"} />
             <UploadFileInputStyle>
               <UploadFileInputText>{uploadFileName}</UploadFileInputText>
-              <UploadFileInputButton onClick={() => inputRef.current.click()}>
-                등록
-              </UploadFileInputButton>
+              <UploadFileInputButton onClick={() => inputRef.current.click()}>등록</UploadFileInputButton>
             </UploadFileInputStyle>
           </LanguageMenu>
           <LanguageMenu>
@@ -360,27 +324,14 @@ const App = () => {
             <SelectBox data={selectData} onSelect={onSelect} />
           </LanguageMenu>
           <JsonView>
-            <ReactJson
-              src={jsonData}
-              displayDataTypes={false}
-              iconStyle={"circle"}
-            />
+            <ReactJson src={jsonData} displayDataTypes={false} iconStyle={"circle"} />
           </JsonView>
         </ConverterWrapper>
         <ConverterBottomWrap>
-          <DownloadButton
-            disabled={jsonUrl === ""}
-            href={jsonUrl}
-            id={`${fileName}`}
-            download={`${fileName}`}
-          >
+          <DownloadButton disabled={jsonUrl === ""} href={jsonUrl} id={`${fileName}`} download={`${fileName}`}>
             JS 다운로드
           </DownloadButton>
-          <AllDownloadButton
-            disabled={preString === "" && strString === ""}
-            active={jsonUrl === ""}
-            onClick={onCreateZip}
-          >
+          <AllDownloadButton disabled={preString === "" && strString === ""} active={jsonUrl === ""} onClick={onCreateZip}>
             ZIP 다운로드
           </AllDownloadButton>
         </ConverterBottomWrap>

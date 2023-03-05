@@ -13,6 +13,7 @@ function createWindow() {
       enableRemoteModule: true,
       devTools: isDev,
     },
+    resizable: false,
   });
 
   mainWindow.loadURL(isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`);
@@ -21,7 +22,7 @@ function createWindow() {
     mainWindow.webContents.openDevTools({ mode: "detach" });
   }
 
-  mainWindow.setResizable(true);
+  mainWindow.removeMenu(true);
   mainWindow.on("closed", () => (mainWindow = null));
   mainWindow.focus();
 }

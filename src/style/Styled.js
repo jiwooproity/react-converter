@@ -2,12 +2,11 @@ import styled from "styled-components";
 
 export const ConverterContainer = styled.div`
   width: 100%;
-  height: 100vh;
+  height: 100%;
 
   position: relative;
 
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
 
@@ -15,18 +14,22 @@ export const ConverterContainer = styled.div`
 `;
 
 export const ConvertMainWrapper = styled.div`
-  border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
-    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  width: 100%;
+  height: 100%;
+
+  /* border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset; */
 
   overflow: hidden;
 `;
 
 export const ConverterWrapper = styled.div`
+  width: 100%;
+  height: 531px;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
 
   background-color: white;
 `;
@@ -56,7 +59,7 @@ export const ConverterTitle = styled.h1`
 export const LanguageMenu = styled.div`
   width: 100%;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   list-style: none;
 
@@ -71,6 +74,7 @@ export const LanguageRequired = styled.span`
 `;
 
 export const LanguageTarget = styled.span`
+  width: 30px;
   font-size: 11px;
   line-height: 12px;
 
@@ -95,6 +99,7 @@ export const DownloadButton = styled.a`
 
   background-color: rgba(0, 0, 0, 0.8);
 
+  opacity: ${({ disabled }) => (disabled ? "0" : "1")};
   pointer-events: ${({ disabled }) => (disabled ? "none" : "")};
 
   &:hover {
@@ -129,12 +134,12 @@ export const AllDownloadButton = styled.a`
     color: white;
   }
 
-  transition: background-color 0.5s ease, color 0.5s ease, width 0.5s ease,
-    height 0.5s ease;
+  transition: background-color 0.5s ease, color 0.5s ease, width 0.5s ease, height 0.5s ease;
 `;
 
 export const JsonView = styled.div`
-  width: 550px;
+  /* width: 550px; */
+  width: 100%;
   margin-top: 15px;
   max-height: 300px;
   overflow-y: scroll;
@@ -161,14 +166,15 @@ export const JsonView = styled.div`
 `;
 
 export const UploadFileInput = styled.input`
-  width: 510px;
+  /* width: 510px; */
   padding: 8px 5px 8px 5px;
   margin-left: 10px;
   display: none;
 `;
 
 export const UploadFileInputStyle = styled.label`
-  width: 510px;
+  /* width: 510px; */
+  width: 100%;
   font-size: 12px;
   margin-left: 10px;
   display: flex;
@@ -177,14 +183,11 @@ export const UploadFileInputStyle = styled.label`
 `;
 
 export const UploadFileInputText = styled.span`
-  width: 450px;
+  width: 92%;
   font-size: 12px;
   padding: 8px 5px 8px 5px;
 
-  border-bottom: ${({ required }) =>
-    required
-      ? "1px solid rgba(165, 0, 52, 0.3)"
-      : "1px solid rgba(0, 0, 0, 0.1)"};
+  border-bottom: ${({ required }) => (required ? "1px solid rgba(165, 0, 52, 0.3)" : "1px solid rgba(0, 0, 0, 0.1)")};
 
   &:hover {
     border-color: rgba(0, 0, 0, 0.5);
@@ -214,7 +217,8 @@ export const UploadFileInputButton = styled.button`
 `;
 
 export const UploadModeWrap = styled.div`
-  width: 510px;
+  /* width: 510px; */
+  width: 100%;
   margin-left: 10px;
 
   display: flex;
@@ -228,8 +232,7 @@ export const UploadModeButton = styled.button`
   font-size: 12px;
   color: white;
   margin-right: 2px;
-  background-color: ${({ active }) =>
-    active ? "#a50034" : "rgba(0, 0, 0, 0.8)"};
+  background-color: ${({ active }) => (active ? "#a50034" : "rgba(0, 0, 0, 0.8)")};
 
   &:hover {
     background-color: #a50034;

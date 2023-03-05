@@ -55,6 +55,8 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "concurrently": "^7.6.0",
+    "cross-env": "^7.0.3",
     "electron-is-dev": "^2.0.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
@@ -74,7 +76,8 @@
     "electron-is-dev": "^2.0.0"
   },
   "scripts": {
-    "start": "electron .",
+    "react-start": "react-scripts start",
+    "start": "concurrently \"cross-env NODE_ENV=development BROWSER=none npm run react-start\" \"wait-on http://localhost:3000 && electron .\"",
     "build:osx": "build --mac",
     "build:linux": "npm run build:linux32 && npm run build:linux64",
     "build:linux32": "build --linux --ia32",
