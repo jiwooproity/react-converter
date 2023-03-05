@@ -25,7 +25,7 @@ export const ConvertMainWrapper = styled.div`
 
 export const ConverterWrapper = styled.div`
   width: 100%;
-  height: 531px;
+  height: 551px;
   padding: 20px;
   display: flex;
   flex-direction: column;

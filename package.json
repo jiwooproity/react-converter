@@ -76,8 +76,10 @@
     "electron-is-dev": "^2.0.0"
   },
   "scripts": {
+    "react-build": "react-scripts build",
     "react-start": "react-scripts start",
     "start": "concurrently \"cross-env NODE_ENV=development BROWSER=none npm run react-start\" \"wait-on http://localhost:3000 && electron .\"",
+    "build": "npm run react-build && electron-builder",
     "build:osx": "build --mac",
     "build:linux": "npm run build:linux32 && npm run build:linux64",
     "build:linux32": "build --linux --ia32",
